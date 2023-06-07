@@ -1,0 +1,134 @@
+---
+title: "sablefish_obs_coverage_draft"
+author: "Matt Callahan"
+date: '2023-06-06'
+output: 
+  word_document:
+    keep_md: yes
+params: 
+  data: "SABL"
+
+---
+
+
+This is a report of ``r params$data`` catch.
+
+```{r message=FALSE, echo=FALSE}
+library(tidyverse)
+library(sf)
+library(akmarineareas2)
+library(odbc)
+library(getPass)
+library(lubridate)
+library(janitor)
+```
+
+
+```{r fig.cap="test plot of data$species"}
+#plot test map
+ggplot()+geom_sf(data=nmfs)+
+  ggtitle(paste0(params$data, " catch areas"))
+```
+
+
+```{r}
+
+#connect
+con <- dbConnect(odbc::odbc(), "akfin", UID=getPass(msg="USER NAME"), PWD=getPass())
+```
+
+```{r}
+#query database
+CASdat<- dbFetch(dbSendQuery(con,
+                           paste0("select year, week_end_date, wed, fmp_area,	fmp_subarea, reporting_area_code, agency_gear_code,
+                       trip_target_group, trip_target_name, species_group_name, species_name, processor_permit_id,
+                       ito_company processor_name, ito_plant processor_plant, ves_akr_adfg, ves_akr_name,	ves_akr_length,
+                       retained_or_discarded, weight_posted, gf_harvest_sector, deployment_trip_start_date,	deployment_trip_end_date,
+                       deployment_trip_pk, monitoring_status,	sampling_strata_deployment_category, sampling_strata,
+                       sampling_strata_name, sampling_strata_selection_rate, management_program_code
+                from council.comprehensive_blend_ca
+                where year >= 2023
+                and species_group_code = '",noquote(params$data),"'
+                and (fmp_area = 'GOA' or fmp_area = 'BSAI')
+                ")))%>%
+    clean_names() %>% 
+    group_by(year, week_end_date, wed, fmp_area,	fmp_subarea, reporting_area_code, agency_gear_code,
+           trip_target_group, trip_target_name, species_group_name, species_name, processor_permit_id,
+           processor_name, processor_plant, ves_akr_adfg, ves_akr_name,	ves_akr_length,
+           retained_or_discarded, gf_harvest_sector, deployment_trip_start_date,	deployment_trip_end_date,
+           deployment_trip_pk, monitoring_status,	sampling_strata_deployment_category, sampling_strata,
+           sampling_strata_name, sampling_strata_selection_rate, management_program_code) %>% 
+  summarise(catch_mt = sum(weight_posted))
+
+```
+```{r}
+#process data
+CASdat <- CASdat %>% 
+  mutate(week_end_date = ymd(week_end_date),
+         mgmt_area = if_else(fmp_subarea == "BS", "BS",
+                             if_else(fmp_subarea == "AI", "AI",
+                                     if_else(fmp_subarea == "WG", "WGOA",
+                                             if_else(fmp_subarea == "CG", "CGOA", "EGOA")))),
+         OBS_Coverage = if_else(sampling_strata_name == "No Selection", "None",
+                                if_else(sampling_strata_name == "Full Selection" |
+                                          sampling_strata_name == "Trawl EM Full Coverage Selection", "Full", 
+                                        if_else(sampling_strata_name == "EM Hook-and-Line Trip Selection" |
+                                                  sampling_strata_name == "EM Pot Trip Selection" |
+                                                  sampling_strata_name == "EM Pot Tender Trip Selection" |
+                                                  sampling_strata_name == "Trawl EM Partial Coverage Selection", "EM Partial", 
+                                                if_else(sampling_strata_name == "Trawl EM Full Coverage Selection", "EM Full", "Partial")))),
+         observed = if_else(monitoring_status == "FIXED_GEAR_EM", "Catch Only",
+                            if_else(monitoring_status == "NO_MONITORING", "None","Catch/Biologicals")))
+
+```
+
+```{r}
+#plotting
+theme_doc<- function(base_size = 12, base_family = "Arial") { #this function sets the theme for the whole figure
+  theme_bw(base_size = base_size, base_family = base_family) %+replace% #also note that this creates a bunch of font warnings that are not a real problem, I just haven't dealt with it yet
+    theme(
+      plot.title=element_text(size=12,colour='black',hjust = 0.5),
+      plot.background=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major=element_line(color="grey90"),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      axis.line.x = element_line(colour='black'),
+      axis.line.y = element_line(colour='black'),
+      axis.text=element_text(size=10,colour='black'),
+      axis.ticks=element_line(colour='black'),
+      axis.title.y=element_text(colour='black',angle=90),
+      axis.title.x=element_text(colour='black'),
+      legend.background=element_blank(),
+      legend.text=element_text(colour='black',size=10),
+      legend.title=element_text(colour='black',size=10),
+      strip.background=element_blank(),
+      strip.text=element_text(size=10,colour='black')
+    )
+}
+
+levels <- CASdat %>% 
+  select(agency_gear_code, sampling_strata_name, OBS_Coverage) %>% 
+  unique() %>% 
+  arrange(OBS_Coverage, agency_gear_code)
+
+area_catch <- CASdat %>% 
+  group_by(year, mgmt_area, agency_gear_code) %>% 
+  summarise(catch_mt = sum(catch_mt)) %>%
+  rename(gear = agency_gear_code)
+
+area_catch$mgmt_area <- factor(area_catch$mgmt_area, 
+                               levels = c("AI", "BS", "WGOA", "CGOA", "EGOA"))
+area_catch$gear <- factor(area_catch$gear, 
+                               levels = c("PTR", "NPT", "JIG", "POT", "HAL"))
+
+ggplot(area_catch, aes(x=as.factor(year), y=catch_mt, 
+                               fill = gear, color = gear))+
+  geom_bar(position = position_stack(), stat = "identity", show.legend = F)+
+  facet_grid(mgmt_area~.)+
+  labs(x = "Year", y = "Catch (mt)")+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
+  scale_x_discrete(breaks = seq(min(area_catch$year), max(area_catch$year), by = 2))#+
+ # theme_doc()
+```
+
