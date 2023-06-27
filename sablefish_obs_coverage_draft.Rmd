@@ -6,40 +6,40 @@ output:
   word_document:
     keep_md: yes
 params: 
-  data: "SABL"
+  name: "sablefish"
+  cas: 710
+  obs: 203
 
 ---
 
 
-This is a report of ``r params$data`` catch.
+This is a report of ``r params$name`` catch.
 
-```{r message=FALSE, echo=FALSE}
+```{r include=FALSE}
 library(tidyverse)
-library(sf)
-library(akmarineareas2)
 library(odbc)
 library(getPass)
 library(lubridate)
 library(janitor)
+library(gridExtra)
+library(flextable)
+
+#This avoids scientific notation on plots
+options(scipen = 999)
 ```
 
 
-```{r fig.cap="test plot of data$species"}
-#plot test map
-ggplot()+geom_sf(data=nmfs)+
-  ggtitle(paste0(params$data, " catch areas"))
-```
+```{r include=FALSE}
 
-
-```{r}
-
-#connect
+#connect to AKFIN
 con <- dbConnect(odbc::odbc(), "akfin", UID=getPass(msg="USER NAME"), PWD=getPass())
 ```
 
-```{r}
-#query database
-CASdat<- dbFetch(dbSendQuery(con,
+
+**Figure 1: Catch (3 columns, actuals only)**
+```{r include=FALSE}
+#pull catch data
+casdat<- dbFetch(dbSendQuery(con,
                            paste0("select year, week_end_date, wed, fmp_area,	fmp_subarea, reporting_area_code, agency_gear_code,
                        trip_target_group, trip_target_name, species_group_name, species_name, processor_permit_id,
                        ito_company processor_name, ito_plant processor_plant, ves_akr_adfg, ves_akr_name,	ves_akr_length,
@@ -47,8 +47,8 @@ CASdat<- dbFetch(dbSendQuery(con,
                        deployment_trip_pk, monitoring_status,	sampling_strata_deployment_category, sampling_strata,
                        sampling_strata_name, sampling_strata_selection_rate, management_program_code
                 from council.comprehensive_blend_ca
-                where year >= 2023
-                and species_group_code = '",noquote(params$data),"'
+                where year >= 2013
+                and agency_species_code = '",noquote(params$cas),"'
                 and (fmp_area = 'GOA' or fmp_area = 'BSAI')
                 ")))%>%
     clean_names() %>% 
@@ -61,31 +61,52 @@ CASdat<- dbFetch(dbSendQuery(con,
   summarise(catch_mt = sum(weight_posted))
 
 ```
-```{r}
-#process data
-CASdat <- CASdat %>% 
+```{r include=FALSE}
+#process catch data for plotting
+casdat <- casdat %>% 
   mutate(week_end_date = ymd(week_end_date),
-         mgmt_area = if_else(fmp_subarea == "BS", "BS",
-                             if_else(fmp_subarea == "AI", "AI",
-                                     if_else(fmp_subarea == "WG", "WGOA",
-                                             if_else(fmp_subarea == "CG", "CGOA", "EGOA")))),
-         OBS_Coverage = if_else(sampling_strata_name == "No Selection", "None",
+         gear = agency_gear_code,
+         mgmt_area=recode(fmp_subarea, "BS"="BS","AI"="AI","WG"="WGOA", "CG"="CGOA", "WY"="WY", "SE"="EY"),
+         # mgmt_area = if_else(fmp_subarea == "BS", "BS",
+         #                     if_else(fmp_subarea == "AI", "AI",
+         #                             if_else(fmp_subarea == "WG", "WGOA",
+         #                                     if_else(fmp_subarea == "CG", "CGOA", "EGOA")))),
+         obs_coverage = if_else(sampling_strata_name == "No Selection", "None",
                                 if_else(sampling_strata_name == "Full Selection" |
-                                          sampling_strata_name == "Trawl EM Full Coverage Selection", "Full", 
+                                          sampling_strata_name == "Trawl EM Full Coverage Selection", "Full",
                                         if_else(sampling_strata_name == "EM Hook-and-Line Trip Selection" |
                                                   sampling_strata_name == "EM Pot Trip Selection" |
                                                   sampling_strata_name == "EM Pot Tender Trip Selection" |
-                                                  sampling_strata_name == "Trawl EM Partial Coverage Selection", "EM Partial", 
+                                                  sampling_strata_name == "Trawl EM Partial Coverage Selection", "EM Partial",
                                                 if_else(sampling_strata_name == "Trawl EM Full Coverage Selection", "EM Full", "Partial")))),
          observed = if_else(monitoring_status == "FIXED_GEAR_EM", "Catch Only",
                             if_else(monitoring_status == "NO_MONITORING", "None","Catch/Biologicals")))
 
+         # obs_coverage=recode(sampling_strata_name, "No Selection"="None",
+         #                     "Full Selection"="Full", 
+         #                     "Trawl EM Full Coverage Selection"="Full",
+         #                     "EM Hook-and-Line Trip Selection"="EM Partial", 
+         #                     "EM Pot Trip Selection"="EM Partial",
+         #                     "EM Pot Tender Trip Selection"="EM Partial" ,
+         #                     "Trawl EM Partial Coverage Selection"="EM Partial",
+         #                     "Trawl EM Full Coverage Selection" = "EM Full", 
+         #                     "Pot Trip Selection" = "Partial",
+         #                     ),
+
+#set plotting orders
+casdat$mgmt_area <- factor(casdat$mgmt_area, 
+                               levels = c("AI", "BS", "WGOA", "CGOA", "WY", "EY"))
+casdat$gear <- factor(casdat$gear, 
+                               levels = c("PTR", "NPT", "JIG", "POT", "HAL"))
+
 ```
 
-```{r}
-#plotting
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.cap=paste0("Figure 1. ",```{r params$name}```," catch by gear type that was either retained, discarded, or the sum of retained and discarded catch by management area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+
+
 theme_doc<- function(base_size = 12, base_family = "Arial") { #this function sets the theme for the whole figure
-  theme_bw(base_size = base_size, base_family = base_family) %+replace% #also note that this creates a bunch of font warnings that are not a real problem, I just haven't dealt with it yet
+#  theme_bw(base_size = base_size, base_family = base_family) %+replace% #also note that this creates a bunch of font warnings that are not a real problem, I just haven't dealt with it yet
+  theme_bw()+
     theme(
       plot.title=element_text(size=12,colour='black',hjust = 0.5),
       plot.background=element_blank(),
@@ -96,39 +117,467 @@ theme_doc<- function(base_size = 12, base_family = "Arial") { #this function set
       axis.line.x = element_line(colour='black'),
       axis.line.y = element_line(colour='black'),
       axis.text=element_text(size=10,colour='black'),
-      axis.ticks=element_line(colour='black'),
+      axis.ticks.y=element_line(colour='black'),
+      axis.ticks.x=element_blank(),
       axis.title.y=element_text(colour='black',angle=90),
       axis.title.x=element_text(colour='black'),
       legend.background=element_blank(),
       legend.text=element_text(colour='black',size=10),
       legend.title=element_text(colour='black',size=10),
       strip.background=element_blank(),
-      strip.text=element_text(size=10,colour='black')
+      strip.text=element_text(size=10,colour='black'),
+      axis.text.x = element_text(angle = 45, hjust=1, vjust=1.1)
     )
 }
 
-levels <- CASdat %>% 
-  select(agency_gear_code, sampling_strata_name, OBS_Coverage) %>% 
-  unique() %>% 
-  arrange(OBS_Coverage, agency_gear_code)
+mgmt_colors<-c("#B2282E","#575195","#BC4700","#4C9C2E","#00467f","#1ECAD3")
 
-area_catch <- CASdat %>% 
-  group_by(year, mgmt_area, agency_gear_code) %>% 
+gear_colors<-c("#7F7FFF", "#007934","#FF8300", "#0093D0","#93D500")
+
+startyear<-min(as.numeric(casdat$year))
+endyear<-max(as.numeric(casdat$year))
+
+#divide into retained and discarded
+fig1dat<-casdat %>% 
+  filter(retained_or_discarded=="R") %>%
+  group_by(year, mgmt_area, gear, retained_or_discarded) %>% 
   summarise(catch_mt = sum(catch_mt)) %>%
-  rename(gear = agency_gear_code)
+  bind_rows(casdat %>% 
+  filter(retained_or_discarded=="D") %>%
+  group_by(year, mgmt_area, gear, retained_or_discarded) %>% 
+  summarise(catch_mt = sum(catch_mt))) %>%
+  bind_rows(fig1_both <- casdat %>% 
+  group_by(year, mgmt_area, gear) %>% 
+  summarise(catch_mt = sum(catch_mt)) %>%
+    mutate(retained_or_discarded="Both") %>%
+    dplyr::select(year, mgmt_area, gear, retained_or_discarded, catch_mt)) %>%
+  mutate(retained_or_discarded=recode_factor(retained_or_discarded, "Both"="Total", "R"="Retained", "D"="Discarded"))
 
-area_catch$mgmt_area <- factor(area_catch$mgmt_area, 
-                               levels = c("AI", "BS", "WGOA", "CGOA", "EGOA"))
-area_catch$gear <- factor(area_catch$gear, 
+ggplot(fig1dat, aes(x=as.factor(year), y=catch_mt, 
+                               fill = gear, color = gear))+
+  geom_bar(position = position_stack(), stat = "identity", show.legend = T)+
+  facet_grid(rows=vars(mgmt_area), cols=vars(retained_or_discarded))+
+  labs(x = "Year", y = "Catch (mt)")+
+  scale_color_manual(values=gear_colors)+
+  scale_fill_manual(values=gear_colors)+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+
+
+```
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.cap=paste0("Figure 2. Proportion of fixed gear ",```{r params$name}```," catch caught in pots in the GOA, the BSAI, and both combined")}
+#process data
+fig2dat<-casdat%>%
+  #filter to fixed gear
+  filter(gear %in% c("HAL", "POT", "JIG")) %>%
+  #calculate total for all fixed gear
+  group_by(year, fmp_area) %>%
+  summarize(fixed_gear_catch=sum(catch_mt)) %>%
+  #add column for pot gear only
+  left_join(casdat%>%
+  #filter to pot
+  filter(gear == "POT") %>%
+  #calculate total for pot
+  group_by(year, fmp_area) %>%
+  summarize(pot_catch=sum(catch_mt)), 
+  by=c("year"="year", "fmp_area"="fmp_area")) %>%
+  mutate(prop_pot=pot_catch/fixed_gear_catch)
+
+
+fig2<-ggplot()+
+  geom_line(data=fig2dat%>%filter(fmp_area=="BSAI"), aes(x=as.numeric(year), y=prop_pot), size=1, lty=3)+
+    geom_line(data=fig2dat%>%filter(fmp_area=="GOA"), aes(x=as.numeric(year), y=prop_pot), size=1, lty=2)+
+  geom_line(data=fig2dat%>%group_by(year) %>% 
+              summarize(fixed_gear_catch=sum(fixed_gear_catch),
+                        pot_catch=sum(pot_catch)) %>% 
+              mutate(prop_pot=pot_catch/fixed_gear_catch), 
+            aes(x=as.numeric(year), y=prop_pot), size=1, lty=1)+
+  #facet_wrap(~fmp_area)+
+  scale_x_continuous(breaks = seq(startyear, endyear, by = 3))+
+  xlab("Year")+ ylab("Pot proportion")+
+  theme_doc()
+fig2
+```
+
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.cap=paste0("Figure 3. ",```{r params$name}```," catch in each observer coverage category in ODDS, including fixed gear electronic monitoring (EM). This catch was not necessarily observed. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+#set plotting order
+casdat$obs_coverage<-factor(casdat$obs_coverage, levels = c("None", "Partial", "EM Partial", "Full"))
+
+coverage_colors<-c("#FF4438","#625BC4","#FF8300","#4C9C2E")
+
+#filter data
+fig3dat<-casdat %>% 
+  group_by(year, mgmt_area, obs_coverage, gear) %>% 
+  summarise(catch_mt = sum(catch_mt)) %>% 
+  inner_join(casdat %>% 
+  group_by(year, mgmt_area) %>% 
+  summarise(totcatch = sum(catch_mt)), by = c("year", "mgmt_area")) %>% 
+  mutate(prop_catch = catch_mt/totcatch) %>% 
+  filter(gear != "JIG")
+
+fig3 <- ggplot(fig3dat, aes(x=as.factor(year), y=prop_catch, fill=obs_coverage, color=obs_coverage))+
+  geom_bar(position = position_fill(), stat = "identity")+
+  facet_grid(mgmt_area~gear)+
+  labs(x = "Year", y = "Proportion")+
+  scale_y_continuous(breaks=c(0,0.5,1))+
+  scale_color_manual(values=coverage_colors)+
+  scale_fill_manual(values=coverage_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fig3
+  
+```
+
+
+**Figure 4 Sablefish catch by gear type either observed by electronic monitoring (EM), observers, or no coverage**
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.cap=paste0("Figure 4. ",```{r params$name}```," catch by gear type either observed by electronic monitoring (EM), observers, or no coverage. Biological samples were not taken whenever an observer was present. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+biol_colors<-c("#625BC4","#AAD7DD","#D02C2F" )
+  
+areagear_tot <- casdat %>% 
+  filter(gear != "JIG") %>% 
+  group_by(year, mgmt_area, gear) %>% 
+  summarise(totcatch = sum(catch_mt))
+
+obs_prop <- casdat %>% 
+  filter(agency_gear_code != "JIG") %>% 
+  group_by(year, mgmt_area, observed, gear) %>% 
+  summarise(catch_mt = sum(catch_mt)) %>% 
+  inner_join(areagear_tot, by = c("year", "mgmt_area","gear")) %>% 
+  mutate(prop_catch = catch_mt/totcatch,
+         Coverage = recode(observed, "Catch Only"="EM", "Catch/Biologicals"="Observer", "None"="No Coverage"))
+
+fig4 <- ggplot(obs_prop, aes(x=as.factor(year), y=prop_catch, fill=Coverage, color=Coverage))+
+  geom_bar(position = position_stack(), stat = "identity")+
+    scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  facet_grid(mgmt_area~gear)+
+  labs(x = "Year", y = "Proportion")+
+  scale_y_continuous(breaks=c(0,0.5,1))+
+  scale_color_manual(values=biol_colors)+
+  scale_fill_manual(values=biol_colors)+
+  theme_doc()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+fig4
+```
+
+**Fig 5 The total and proportion of sablefish lengths collected by observers by gear and area. **
+
+```{r include=FALSE}
+#pull obs length data
+#pull catch data
+norln<- dbFetch(dbSendQuery(con,
+                           paste0("select species, nmfs_area,  year, akr_gear, fmp_area, fmp_subarea, sampling_strata_name, monitoring_status, sum(frequency) n_length
+                from NORPAC.debriefed_length_mv
+                where YEAR >= 2013
+                and FMP_AREA in ('GOA','BSAI')
+                and SPECIES = '",noquote(params$obs),"'
+                group by species, nmfs_area,  year, akr_gear, fmp_area, fmp_subarea, sampling_strata_name, monitoring_status")))
+               
+
+norln <- norln %>% 
+  rename_with(tolower) %>%
+  #Is there a reason we filtered on nmfs area here and fmp_area for cas?
+  #filter(nmfs_area != 649) %>% 
+  mutate(gear = akr_gear,
+         mgmt_area=recode(fmp_subarea, "BS"="BS","AI"="AI","WG"="WGOA", "CG"="CGOA", "WY"="WY", "SE"="EY"),
+         obs_coverage = if_else(sampling_strata_name == "No Selection", "None",
+                                if_else(sampling_strata_name == "Full Selection" |
+                                          sampling_strata_name == "Trawl EM Full Coverage Selection", "Full",
+                                        if_else(sampling_strata_name == "EM Hook-and-Line Trip Selection" |
+                                                  sampling_strata_name == "EM Pot Trip Selection" |
+                                                  sampling_strata_name == "EM Pot Tender Trip Selection" |
+                                                  sampling_strata_name == "Trawl EM Partial Coverage Selection", "EM Partial",
+                                                if_else(sampling_strata_name == "Trawl EM Full Coverage Selection", "EM Full", "Partial")))),
+         observed = if_else(monitoring_status == "FIXED_GEAR_EM", "Catch Only",
+                            if_else(monitoring_status == "NO_MONITORING", "None","Catch/Biologicals")))
+
+
+#set plotting orders
+norln$mgmt_area <- factor(norln$mgmt_area, 
+                               levels = c("AI", "BS", "WGOA", "CGOA", "WY", "EY"))
+norln$gear <- factor(norln$gear, 
                                levels = c("PTR", "NPT", "JIG", "POT", "HAL"))
 
-ggplot(area_catch, aes(x=as.factor(year), y=catch_mt, 
-                               fill = gear, color = gear))+
-  geom_bar(position = position_stack(), stat = "identity", show.legend = F)+
-  facet_grid(mgmt_area~.)+
-  labs(x = "Year", y = "Catch (mt)")+
-  scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
-  scale_x_discrete(breaks = seq(min(area_catch$year), max(area_catch$year), by = 2))#+
- # theme_doc()
 ```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.cap=paste0("Figure 5. The total and proportion of ",```{r params$name}```," lengths collected by observers by gear and area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+#plot 
+fig5dat<-norln%>%
+  group_by(year, mgmt_area, gear) %>%
+  mutate(n_length=sum(n_length))
+#numbers
+fig5_lnum <-ggplot(fig5dat,aes(x=as.factor(year),y=n_length,fill=gear))+
+  geom_bar(position="stack", stat="identity", show.legend = F)+
+  labs(y="Number Samples", x = "Year", title="Sampled Lengths")+
+    scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+    scale_color_manual(values=gear_colors)+
+  scale_fill_manual(values=gear_colors)+
+  facet_grid(mgmt_area~.)+
+  theme_doc()
+#proportion
+fig5_lprop <- ggplot(fig5dat,aes(x=as.factor(year),y=n_length,fill=gear))+
+  geom_bar(position="fill", stat="identity")+
+  labs(y="Proportion", x = "Year", title="Proportion Lengths")+
+  facet_grid(mgmt_area~.)+
+    scale_color_manual(values=gear_colors)+
+  scale_fill_manual(values=gear_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+
+fig5<-grid.arrange(fig5_lnum, fig5_lprop, nrow=1)
+fig5
+```
+
+
+**FIgure 6 The total and proportion of sablefish ages collected by observers by gear and area.**
+```{r include=FALSE}
+#pull obs length data
+#pull catch data
+norage <- dbFetch(dbSendQuery(con,
+                           paste0("
+                select join_key, species_key, cruise, permit, vessel, gear, nmfs_area, specimen_number, Type_1_otolith, type_3_sex_length_weight, year,
+                       gear_description, akr_gear, fmp_gear, fmp_area, fmp_subarea, species_name, akr_species_codes, deployment_trip_pk,
+                       sampling_strata, sampling_strata_name, sampling_strata_deployment_category, sampling_strata_selection_rate, monitoring_status
+                from NORPAC.debriefed_age_flat_mv
+                where year >= 2013
+                and species = '",params$obs,"'
+                and fmp_area in ('GOA', 'BSAI')"
+                ))) %>%
+  clean_names()
+               
+
+norage <- norage %>% 
+  #Is there a reason we filtered on nmfs area here and fmp_area for cas?
+  #filter(nmfs_area != 649) %>% 
+  mutate(gear = akr_gear,
+         mgmt_area=recode(fmp_subarea, "BS"="BS","AI"="AI","WG"="WGOA", "CG"="CGOA", "WY"="WY", "SE"="EY"),
+         obs_coverage = if_else(sampling_strata_name == "No Selection", "None",
+                                if_else(sampling_strata_name == "Full Selection" |
+                                          sampling_strata_name == "Trawl EM Full Coverage Selection", "Full",
+                                        if_else(sampling_strata_name == "EM Hook-and-Line Trip Selection" |
+                                                  sampling_strata_name == "EM Pot Trip Selection" |
+                                                  sampling_strata_name == "EM Pot Tender Trip Selection" |
+                                                  sampling_strata_name == "Trawl EM Partial Coverage Selection", "EM Partial",
+                                                if_else(sampling_strata_name == "Trawl EM Full Coverage Selection", "EM Full", "Partial")))),
+         observed = if_else(monitoring_status == "FIXED_GEAR_EM", "Catch Only",
+                            if_else(monitoring_status == "NO_MONITORING", "None","Catch/Biologicals")))
+
+
+#set plotting orders
+norage$mgmt_area <- factor(norage$mgmt_area, 
+                               levels = c("AI", "BS", "WGOA", "CGOA", "WY", "EY"))
+norage$gear <- factor(norage$akr_gear, 
+                               levels = c("PTR", "NPT", "JIG", "POT", "HAL"))
+
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.cap=paste0("Figure 6. The total and proportion of ", ```{r params$name}```," ages collected by observers by gear and area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+#plot 
+fig6dat<-norage%>%
+  filter(type_1_otolith=="Y") %>% 
+  group_by(year, mgmt_area, gear) %>%
+  summarize(n_otolith=n())
+#numbers
+fig6_anum <-ggplot(fig6dat,aes(x=as.factor(year),y=n_otolith,fill=gear))+
+  geom_bar(position="stack", stat="identity", show.legend = F)+
+  labs(y="Otoliths taken", x = "Year", title="Sampled Otoliths")+
+  facet_grid(mgmt_area~.)+
+  scale_color_manual(values=gear_colors)+
+  scale_fill_manual(values=gear_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+#proportion
+fig6_aprop <- ggplot(fig6dat,aes(x=as.factor(year),y=n_otolith,fill=gear))+
+  geom_bar(position="fill", stat="identity")+
+  labs(y="Proportion", x = "Year", title="Proportion Otoliths")+
+  facet_grid(mgmt_area~.)+
+  scale_color_manual(values=gear_colors)+
+  scale_fill_manual(values=gear_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+
+fig6<-grid.arrange(fig6_anum, fig6_aprop, nrow=1)
+fig6
+```
+
+**Figure 7 The number of sablefish lengths collected per ton of catch by management area (panel a) or by gear (panel b**
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.cap=paste0(Figure 7. The number of ", ```{r params$name}```," lengths collected per ton of catch by management area (panel a) or by gear (panel b). Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+#mgmt area
+fig7dat_a <- norln%>%
+  group_by(year, mgmt_area) %>%
+  summarize(n_length=sum(n_length)) %>% 
+  left_join(casdat%>%
+              mutate(year=as.numeric(year))%>%
+  group_by(year, mgmt_area) %>%
+  summarize(catch_mt=sum(catch_mt)),
+  by=c("year"="year", "mgmt_area"="mgmt_area"))%>%
+  mutate(lratio=n_length/catch_mt)
+
+#gear
+fig7dat_b <- norln%>%
+  group_by(year, gear) %>%
+  summarize(n_length=sum(n_length)) %>% 
+  left_join(casdat%>%
+              mutate(year=as.numeric(year))%>%
+  group_by(year, gear) %>%
+  summarize(catch_mt=sum(catch_mt)),
+  by=c("year"="year", "gear"="gear"))%>%
+  mutate(lratio=n_length/catch_mt)
+
+
+#area
+fig7a <-ggplot(fig7dat_a, aes(x=as.factor(year), y=lratio, fill= mgmt_area))+
+  geom_bar(position="stack", stat="identity", show.legend=FALSE)+
+  labs(y="n lengths/mt", x = "Year", title="Lengths per metric ton")+
+  facet_grid(~mgmt_area~., scales="free")+
+    scale_color_manual(values=mgmt_colors)+
+  scale_fill_manual(values=mgmt_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+#gear
+fig7b <-ggplot(fig7dat_b, aes(x=as.factor(year), y=lratio, fill= gear))+
+  geom_bar(position="stack", stat="identity", show.legend=FALSE)+
+  labs(y="n lengths/mt", x = "Year", title="Lengths per metric ton")+
+  facet_grid(~gear~., scales="free")+
+    scale_color_manual(values=gear_colors)+
+  scale_fill_manual(values=gear_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+
+fig7<-grid.arrange(fig7a, fig7b, nrow=1)
+fig7
+```
+
+
+**Figure 8. The number of sablefish ages collected per ton of catch by management area and gear**
+```{r warning=FALSE, message=FALSE, echo=FALSE,}
+#mgmt area
+fig8dat_a <- norage%>%
+  filter(type_1_otolith=="Y") %>% 
+  group_by(year, mgmt_area) %>%
+  summarize(n_otolith=n()) %>% 
+  left_join(casdat%>%
+              mutate(year=as.numeric(year))%>%
+  group_by(year, mgmt_area) %>%
+  summarize(catch_mt=sum(catch_mt)),
+  by=c("year"="year", "mgmt_area"="mgmt_area"))%>%
+  mutate(oratio=n_otolith/catch_mt)
+
+#gear
+fig8dat_b <- norage%>%
+  filter(type_1_otolith=="Y") %>% 
+  group_by(year, mgmt_area, gear) %>%
+  summarize(n_otolith=n()) %>% 
+  left_join(casdat%>%
+              mutate(year=as.numeric(year))%>%
+  group_by(year, gear) %>%
+  summarize(catch_mt=sum(catch_mt)),
+  by=c("year"="year", "gear"="gear"))%>%
+  mutate(oratio=n_otolith/catch_mt)
+
+
+#area
+fig8a <-ggplot(fig8dat_a, aes(x=as.factor(year), y=oratio, fill= mgmt_area))+
+  geom_bar(position="stack", stat="identity", show.legend=FALSE)+
+  labs(y="n otoliths/mt", x = "Year", title="otoliths per metric ton")+
+  facet_grid(~mgmt_area~., scales="free")+
+  scale_color_manual(values=mgmt_colors)+
+  scale_fill_manual(values=mgmt_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+#gear
+fig8b <-ggplot(fig8dat_b, aes(x=as.factor(year), y=oratio, fill= gear))+
+  geom_bar(position="stack", stat="identity", show.legend=FALSE)+
+  labs(y="n otoliths/mt", x = "Year", title="otoliths per metric ton")+
+  scale_color_manual(values=gear_colors)+
+  scale_fill_manual(values=gear_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  facet_grid(~gear~., scales="free")+
+  theme_doc()
+
+fig8<-grid.arrange(fig8a, fig8b, nrow=1)
+fig8
+```
+
+**Figure 9 The proportion of lengths that were measured at-sea versus in ports by observers**
+```{r warning=FALSE, message=FALSE, echo=FALSE,}
+norln<-norln%>%mutate(obs_source=recode_factor(monitoring_status,"AT_SEA_WITH_SALMON_CENSUS"="AT_SEA", "TRAWL_EM_WITH_SHORESIDE"="SHORESIDE", "NO_MONITORING"="SHORESIDE"))
+
+fig9dat_a<-norln %>%
+  mutate(year=as.character(year)) %>%
+  group_by(year, mgmt_area, obs_source) %>%
+    summarize(n_length=sum(n_length))
+
+fig9dat_b<-norln %>%
+  mutate(year=as.character(year)) %>%
+  group_by(year, gear, obs_source) %>%
+    summarize(n_length=sum(n_length))
+    
+fig9a <- ggplot(fig9dat_a,aes(x=as.factor(year),y=n_length,fill=obs_source))+
+  geom_bar(position="fill", stat="identity", show.legend=FALSE)+
+  labs(y="Proportion", x = "Year", title="Proportion lengths by area")+
+  facet_grid(mgmt_area~.)+
+    scale_color_manual(values=coverage_colors)+
+  scale_fill_manual(values=coverage_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+
+fig9b <- ggplot(fig9dat_b,aes(x=as.factor(year),y=n_length,fill=obs_source))+
+  geom_bar(position="fill", stat="identity")+
+  labs(y="Proportion", x = "Year", title="Proportion lengths by gear")+
+  facet_grid(gear~.)+
+    scale_color_manual(values=coverage_colors)+
+  scale_fill_manual(values=coverage_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+
+fig9<-grid.arrange(fig9a, fig9b, nrow=1)
+
+```
+
+
+**Figure 10 The proportion of catch with electronic monitoring (EM) review and the number of lengths per mt by area in pot and hook and line gear.**
+
+```{r warning=FALSE, message=FALSE, echo=FALSE,}
+fig10a<-ggplot(data=casdat, aes(x=as.factor(year),y=catch_mt, fill=obs_coverage))+
+  geom_bar(position="fill", stat="identity")+
+    labs(y="Proportion", x = "Year", title="Proportion catch by coverage")+
+  facet_grid(mgmt_area~.)+
+    scale_color_manual(values=coverage_colors)+
+  scale_fill_manual(values=coverage_colors)+
+  scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+
+fig10bdat <- norln%>%
+  filter(gear %in% c("POT","HAL")) %>%
+  group_by(year, mgmt_area) %>%
+  summarize(n_length=sum(n_length)) %>% 
+  left_join(casdat%>%
+              filter(gear %in% c("POT","HAL")) %>%
+              mutate(year=as.numeric(year))%>%
+  group_by(year, mgmt_area) %>%
+  summarize(catch_mt=sum(catch_mt)),
+  by=c("year"="year", "mgmt_area"="mgmt_area"))%>%
+  mutate(lratio=n_length/catch_mt)
+
+fig10b<-ggplot(data=fig10bdat, aes(x=year,y=lratio))+
+  geom_line(size=1)+
+  facet_grid(mgmt_area~., scales="free")+
+      labs(y="lengths/mt", x = "Year", title="Lengths per mt in pot and HAL fisheries")+
+#    scale_color_manual(values=coverage_colors)+
+#  scale_fill_manual(values=coverage_colors)+
+  scale_x_continuous(breaks = seq(startyear, endyear, by = 3))+
+  theme_doc()
+
+fig10<-grid.arrange(fig10a, fig10b, nrow=1)
+  
+```
+
+
 

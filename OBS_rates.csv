@@ -1,0 +1,41 @@
+Year,Strata,Expected,Actual
+2016,No Selection,0,0
+2016,HAL,15.4,15
+2016,Pot,15.2,14.7
+2016,Trawl,28.3,28
+2017,No Selection,0,0
+2017,HAL,11.1,12
+2017,HAL Tender,25,0
+2017,Pot,3.9,7.7
+2017,Pot Tender,3.9,5.3
+2017,Trawl,17.6,20.7
+2017,Trawl Tender,14.3,18.8
+2018,No Selection,0,0
+2018,HAL,17.3,15.5
+2018,HAL EM,30,22.7
+2018,Pot,16.2,15.5
+2018,Pot Tender,17.4,29
+2018,Trawl,20.2,20.3
+2018,Trawl Tender,16.7,35
+2019,No Selection,0,0
+2019,HAL,17.7,17.6
+2019,HAL EM,30,31.8
+2019,Pot,15.4,14
+2019,Pot Tender,16.1,29.5
+2019,Pot EM,30,36.4
+2019,Trawl,23.7,25.2
+2019,Trawl Tender,27.1,35.7
+2020,No Selection,0,0
+2020,HAL,15.4,7
+2020,HAL EM,30,30
+2020,Pot,15.2,9
+2020,Pot EM,30,30.9
+2020,Trawl,19.6,17.6
+2020,Trawl EM (GOA),30,32.1
+2021,HAL,15.1,12.4
+2021,Pot,15,16.5
+2021,Trawl,16.1,19.9
+2021,Trawl EM (GOA),30,32.9
+2021,HAL EM,30,27.4
+2021,Pot EM,30,28.5
+2021,No Selection,0,0
