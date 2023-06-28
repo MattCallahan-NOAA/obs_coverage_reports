@@ -1,0 +1,152 @@
+---
+title: "deleteme"
+author: "Matt Callahan"
+date: '2023-06-06'
+output: 
+  word_document
+params: 
+  name: "sablefish"
+  cas: 710
+  obs: 203
+---
+
+```{r include=FALSE}
+# Please run the package loading, akfin connection, and database queries first and then render the document
+# These chunks are not not included when this markdown is run.
+# This improves rendering performance, and avoids having to reconnect and requery each time a formatting change is necessary.
+
+library(tidyverse)
+library(odbc)
+library(getPass)
+library(lubridate)
+library(janitor)
+library(gridExtra)
+```
+
+```{r include=FALSE}
+
+#connect to AKFIN
+con <- dbConnect(odbc::odbc(), "akfin", UID=getPass(msg="USER NAME"), PWD=getPass())
+```
+
+
+**Figure 1: Catch (3 columns, actuals only)**
+```{r include=FALSE}
+#pull catch data
+casdat<- dbFetch(dbSendQuery(con,
+                           paste0("select year, week_end_date, wed, fmp_area,	fmp_subarea, reporting_area_code, agency_gear_code,
+                       trip_target_group, trip_target_name, species_group_name, species_name, processor_permit_id,
+                       ito_company processor_name, ito_plant processor_plant, ves_akr_adfg, ves_akr_name,	ves_akr_length,
+                       retained_or_discarded, weight_posted, gf_harvest_sector, deployment_trip_start_date,	deployment_trip_end_date,
+                       deployment_trip_pk, monitoring_status,	sampling_strata_deployment_category, sampling_strata,
+                       sampling_strata_name, sampling_strata_selection_rate, management_program_code
+                from council.comprehensive_blend_ca
+                where year >= 2013
+                and agency_species_code = '",noquote(params$cas),"'
+                and (fmp_area = 'GOA' or fmp_area = 'BSAI')
+                ")))%>%
+    clean_names() %>% 
+    group_by(year, week_end_date, wed, fmp_area,	fmp_subarea, reporting_area_code, agency_gear_code,
+           trip_target_group, trip_target_name, species_group_name, species_name, processor_permit_id,
+           processor_name, processor_plant, ves_akr_adfg, ves_akr_name,	ves_akr_length,
+           retained_or_discarded, gf_harvest_sector, deployment_trip_start_date,	deployment_trip_end_date,
+           deployment_trip_pk, monitoring_status,	sampling_strata_deployment_category, sampling_strata,
+           sampling_strata_name, sampling_strata_selection_rate, management_program_code) %>% 
+  summarise(catch_mt = sum(weight_posted))
+
+```
+
+```{r include=FALSE}
+#process catch data for plotting
+casdat <- casdat %>% 
+  mutate(week_end_date = ymd(week_end_date),
+         gear = agency_gear_code,
+         mgmt_area=recode(fmp_subarea, "BS"="BS","AI"="AI","WG"="WGOA", "CG"="CGOA", "WY"="WY", "SE"="EY"),
+         # mgmt_area = if_else(fmp_subarea == "BS", "BS",
+         #                     if_else(fmp_subarea == "AI", "AI",
+         #                             if_else(fmp_subarea == "WG", "WGOA",
+         #                                     if_else(fmp_subarea == "CG", "CGOA", "EGOA")))),
+         obs_coverage = if_else(sampling_strata_name == "No Selection", "None",
+                                if_else(sampling_strata_name == "Full Selection" |
+                                          sampling_strata_name == "Trawl EM Full Coverage Selection", "Full",
+                                        if_else(sampling_strata_name == "EM Hook-and-Line Trip Selection" |
+                                                  sampling_strata_name == "EM Pot Trip Selection" |
+                                                  sampling_strata_name == "EM Pot Tender Trip Selection" |
+                                                  sampling_strata_name == "Trawl EM Partial Coverage Selection", "EM Partial",
+                                                if_else(sampling_strata_name == "Trawl EM Full Coverage Selection", "EM Full", "Partial")))),
+         observed = if_else(monitoring_status == "FIXED_GEAR_EM", "Catch Only",
+                            if_else(monitoring_status == "NO_MONITORING", "None","Catch/Biologicals")))
+
+         # obs_coverage=recode(sampling_strata_name, "No Selection"="None",
+         #                     "Full Selection"="Full", 
+         #                     "Trawl EM Full Coverage Selection"="Full",
+         #                     "EM Hook-and-Line Trip Selection"="EM Partial", 
+         #                     "EM Pot Trip Selection"="EM Partial",
+         #                     "EM Pot Tender Trip Selection"="EM Partial" ,
+         #                     "Trawl EM Partial Coverage Selection"="EM Partial",
+         #                     "Trawl EM Full Coverage Selection" = "EM Full", 
+         #                     "Pot Trip Selection" = "Partial",
+         #                     ),
+
+#set plotting orders
+casdat$mgmt_area <- factor(casdat$mgmt_area, 
+                               levels = c("AI", "BS", "WGOA", "CGOA", "WY", "EY"))
+casdat$gear <- factor(casdat$gear, 
+                               levels = c("PTR", "NPT", "JIG", "POT", "HAL"))
+
+```
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.cap=paste0(params$name," catch by gear type that was either retained, discarded, or the sum of retained and discarded catch by management area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).)")}
+
+
+theme_doc<- function(base_size = 12, base_family = "Arial") { #this function sets the theme for the whole figure
+  theme_bw(base_size = base_size, base_family = base_family) %+replace% #also note that this creates a bunch of font warnings that are not a real problem, I just haven't dealt with it yet
+    theme(
+      plot.title=element_text(size=12,colour='black',hjust = 0.5),
+      plot.background=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major=element_line(color="grey90"),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      axis.line.x = element_line(colour='black'),
+      axis.line.y = element_line(colour='black'),
+      axis.text=element_text(size=10,colour='black'),
+      axis.ticks=element_line(colour='black'),
+      axis.title.y=element_text(colour='black',angle=90),
+      axis.title.x=element_text(colour='black'),
+      legend.background=element_blank(),
+      legend.text=element_text(colour='black',size=10),
+      legend.title=element_text(colour='black',size=10),
+      strip.background=element_blank(),
+      strip.text=element_text(size=10,colour='black')
+    )
+}
+
+#divide into retained and discarded
+fig1dat<-casdat %>% 
+  filter(retained_or_discarded=="R") %>%
+  group_by(year, mgmt_area, gear, retained_or_discarded) %>% 
+  summarise(catch_mt = sum(catch_mt)) %>%
+  bind_rows(casdat %>% 
+  filter(retained_or_discarded=="D") %>%
+  group_by(year, mgmt_area, gear, retained_or_discarded) %>% 
+  summarise(catch_mt = sum(catch_mt))) %>%
+  bind_rows(fig1_both <- casdat %>% 
+  group_by(year, mgmt_area, gear) %>% 
+  summarise(catch_mt = sum(catch_mt)) %>%
+    mutate(retained_or_discarded="Both") %>%
+    dplyr::select(year, mgmt_area, gear, retained_or_discarded, catch_mt)) %>%
+  mutate(retained_or_discarded=recode_factor(retained_or_discarded, "Both"="Total", "R"="Retained", "D"="Discarded"))
+
+ggplot(fig1dat, aes(x=as.factor(year), y=catch_mt, 
+                               fill = gear, color = gear))+
+  geom_bar(position = position_stack(), stat = "identity", show.legend = F)+
+  facet_grid(rows=vars(mgmt_area), cols=vars(retained_or_discarded))+
+  labs(x = "Year", y = "Catch (mt)")+
+#  scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
+  scale_x_discrete(breaks = seq(min(fig1dat$year), max(fig1dat$year), by = 2))+
+  theme_doc()
+
+
+```

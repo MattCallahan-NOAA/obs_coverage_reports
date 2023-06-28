@@ -1,0 +1,63 @@
+---
+title: "deletemetoo"
+author: "Matt Callahan"
+date: '2023-06-27'
+output: word_document
+---
+
+
+## R Markdown
+
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.5, fig.width=9, fig.cap="Testcaption"}
+library(ggplot2)
+library(gridExtra)
+
+theme_doc<- function(base_size = 20, base_family = "Arial") { #this function sets the theme for the whole figure
+  theme_bw(base_size = base_size, base_family = base_family) %+replace% #also note that this creates a bunch of font warnings that are not a real problem, I just haven't dealt with it yet
+#  theme_bw()+
+    theme(
+      plot.title=element_text(size=20,colour='black',hjust = 0.5),
+      plot.background=element_blank(),
+      panel.grid.minor=element_blank(),
+      panel.grid.major=element_line(color="grey90"),
+      panel.border = element_blank(),
+      panel.background = element_blank(),
+      axis.line.x = element_line(colour='black'),
+      axis.line.y = element_line(colour='black'),
+      axis.text=element_text(size=20,colour='black'),
+      axis.ticks.y=element_line(colour='black'),
+      axis.ticks.x=element_blank(),
+      axis.title.y=element_text(colour='black',angle=90),
+      axis.title.x=element_text(colour='black'),
+      legend.background=element_blank(),
+      legend.text=element_text(colour='black',size=20),
+      legend.title=element_text(colour='black',size=20),
+      strip.background=element_blank(),
+      strip.text=element_text(size=20,colour='black'),
+      axis.text.x = element_text(angle = 45, hjust=1, vjust=1.1)
+    )
+}
+dummy<-read.csv("OBS_rates.csv")
+p1<-ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
+         geom_line()+
+  theme_doc()
+p2<-ggplot(data=dummy, aes(x=Year, y=Expected, color=Strata))+
+         geom_line()+
+  theme_doc()
+grid.arrange(p1,p2, nrow=2)
+```
+
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.width=9, fig.cap="Testcaption2"}
+p3<-ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
+         geom_line()+
+  theme_doc()
+p4<-ggplot(data=dummy, aes(x=Year, y=Expected, color=Strata))+
+         geom_line()+
+  theme_doc()
+grid.arrange(p3,p4, nrow=1)
+```
+
