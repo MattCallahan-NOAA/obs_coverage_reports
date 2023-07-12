@@ -1,18 +1,21 @@
 ---
 title: "deletemetoo"
 author: "Matt Callahan"
-date: '2023-06-27'
-output: word_document
+date: "`r Sys.Date()`"
+output: bookdown::word_document
 ---
 
 
-## R Markdown
+## Introduction
+This report summarizes the fishery-depenent data observer data that are available and inform the Gulf of Alaska (GOA) and Bering Sea/Aleutian Islands (BSAI) ‘r doc_name’ stock assessment. Logbook, eLandings and fishticket data are not included here. The format of this report is under development and should be considered a draft. Data are queired from the Alaska Regional Office Catch Accounting System (CAS) and queried through AKFIN. The results are based on total catch estimates and observer deployment information. Due to minor differences in observer strata assignments between CAS and what vessels log into the Observer Declare and Deploy System the total catch estimates may be slightly different from those values reported in the North Pacific Observer Program Annual Reports. Any differences are expected to be minor. Data prior to the 2013 Observer Program Restructure are not included in the analyses presented here due to structural changes in the North Pacific Observer Program.
 
 
 
-```{r warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.5, fig.width=9, fig.cap="Testcaption"}
+
+```{r warning=FALSE, message=FALSE, echo=FALSE,  fig.width=6,  fig.cap="Testcaption"}
 library(ggplot2)
 library(gridExtra)
+library(bookdown)
 
 theme_doc<- function(base_size = 20, base_family = "Arial") { #this function sets the theme for the whole figure
   theme_bw(base_size = base_size, base_family = base_family) %+replace% #also note that this creates a bunch of font warnings that are not a real problem, I just haven't dealt with it yet
@@ -34,6 +37,7 @@ theme_doc<- function(base_size = 20, base_family = "Arial") { #this function set
       legend.background=element_blank(),
       legend.text=element_text(colour='black',size=20),
       legend.title=element_text(colour='black',size=20),
+      legend.position = "none",
       strip.background=element_blank(),
       strip.text=element_text(size=20,colour='black'),
       axis.text.x = element_text(angle = 45, hjust=1, vjust=1.1)
@@ -46,12 +50,12 @@ p1<-ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
 p2<-ggplot(data=dummy, aes(x=Year, y=Expected, color=Strata))+
          geom_line()+
   theme_doc()
-grid.arrange(p1,p2, nrow=2)
+grid.arrange(p1,p2, nrow=1)
 ```
 
 
 
-```{r warning=FALSE, message=FALSE, echo=FALSE, fig.width=9, fig.cap="Testcaption2"}
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.5, out.width='100%',  fig.cap="Testcaption2"}
 p3<-ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
          geom_line()+
   theme_doc()
@@ -61,3 +65,25 @@ p4<-ggplot(data=dummy, aes(x=Year, y=Expected, color=Strata))+
 grid.arrange(p3,p4, nrow=1)
 ```
 
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.cap="Testcaption3"}
+ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
+         geom_line()+
+  theme_doc()
+
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.width=6.5,  fig.cap="Testcaption4"}
+ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
+         geom_line()+
+  theme_doc()
+
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.width=7,  fig.cap="Testcaption5"}
+ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
+         geom_line()+
+  theme_doc()
+
+```
