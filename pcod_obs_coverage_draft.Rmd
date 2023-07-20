@@ -1,15 +1,15 @@
 ---
-title: "sablefish_obs_coverage_draft"
+title: "Pacific cod obs coverage draft"
 author: "Matt Callahan"
 date: "`r Sys.Date()`"
 output: 
   word_document:
     keep_md: yes
 params: 
-  name: "sablefish"
-  name_cap: "Sablefish"
-  cas: 710
-  obs: 203
+  name: "Pacific cod"
+  name_cap: "Pacific cod"
+  cas: 110
+  obs: 202
 
 ---
 
