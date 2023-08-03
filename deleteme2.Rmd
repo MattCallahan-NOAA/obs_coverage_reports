@@ -1,12 +1,20 @@
 ---
 title: "deletemetoo"
-author: "Matt Callahan"
+author: "Cara Rodgveller, Cindy Tribuzio, Matt Callahan"
 date: "`r Sys.Date()`"
-output: bookdown::word_document
+output: 
+  word_document:
+    reference_docx: "StckAssess-format2.docx"
 ---
+$$
+\textbf{Cara Rodgveller, Cindy Tribuzio, Matt Callahan}
+$$
 
+$$
+\textbf{`r Sys.Date()`}
+$$
 
-## Introduction
+# Introduction
 This report summarizes the fishery-depenent data observer data that are available and inform the Gulf of Alaska (GOA) and Bering Sea/Aleutian Islands (BSAI) ‘r doc_name’ stock assessment. Logbook, eLandings and fishticket data are not included here. The format of this report is under development and should be considered a draft. Data are queired from the Alaska Regional Office Catch Accounting System (CAS) and queried through AKFIN. The results are based on total catch estimates and observer deployment information. Due to minor differences in observer strata assignments between CAS and what vessels log into the Observer Declare and Deploy System the total catch estimates may be slightly different from those values reported in the North Pacific Observer Program Annual Reports. Any differences are expected to be minor. Data prior to the 2013 Observer Program Restructure are not included in the analyses presented here due to structural changes in the North Pacific Observer Program.
 
 
@@ -54,8 +62,9 @@ grid.arrange(p1,p2, nrow=1)
 ```
 
 
+\newpage
 
-```{r warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.5, out.width='100%',  fig.cap="Testcaption2"}
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.5, out.width="99%",out.height="99%",  fig.cap="Testcaption2"}
 p3<-ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
          geom_line()+
   theme_doc()
@@ -74,12 +83,17 @@ ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
 
 ```
 
+\newpage
+
 ```{r warning=FALSE, message=FALSE, echo=FALSE, fig.width=6.5,  fig.cap="Testcaption4"}
 ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
          geom_line()+
   theme_doc()
 
 ```
+
+
+\newpage
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE, fig.width=7,  fig.cap="Testcaption5"}
 ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
