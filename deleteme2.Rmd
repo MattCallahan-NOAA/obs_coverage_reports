@@ -5,6 +5,13 @@ date: "`r Sys.Date()`"
 output: 
   word_document:
     reference_docx: "StckAssess-format2.docx"
+params: 
+  name: "sablefish"
+  name_cap: "Sablefish"
+  cas: 710
+  obs: 203
+  chapter: "19"
+  appendix: "A"
 ---
 $$
 \textbf{Cara Rodgveller, Cindy Tribuzio, Matt Callahan}
@@ -19,11 +26,15 @@ This report summarizes the fishery-depenent data observer data that are availabl
 
 
 
+\newpage
 
-```{r warning=FALSE, message=FALSE, echo=FALSE,  fig.width=6,  fig.cap="Testcaption"}
+```{r warning=FALSE, message=FALSE, echo=FALSE,   fig.width=6,  fig.cap="Testcaption"}
 library(ggplot2)
+library(magrittr)
+library(dplyr)
 library(gridExtra)
-library(bookdown)
+library(flextable)
+
 
 theme_doc<- function(base_size = 20, base_family = "Arial") { #this function sets the theme for the whole figure
   theme_bw(base_size = base_size, base_family = base_family) %+replace% #also note that this creates a bunch of font warnings that are not a real problem, I just haven't dealt with it yet
@@ -63,6 +74,15 @@ grid.arrange(p1,p2, nrow=1)
 
 
 \newpage
+
+```{r warning=FALSE, message=FALSE, echo=FALSE }
+
+# Create a flextable
+dummy%>%
+  flextable() %>%
+  set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
+```
+
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.5, out.width="99%",out.height="99%",  fig.cap="Testcaption2"}
 p3<-ggplot(data=dummy, aes(x=Year, y=Actual, color=Strata))+
