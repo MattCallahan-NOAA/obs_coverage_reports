@@ -80,6 +80,7 @@ grid.arrange(p1,p2, nrow=1)
 # Create a flextable
 dummy%>%
   flextable() %>%
+  font(part="all", font="New Times Roman")%>%
   set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
 ```
 
