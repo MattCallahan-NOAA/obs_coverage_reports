@@ -283,10 +283,11 @@ fig1dat%>%
   left_join(fig1sum, by=c("Area"="mgmt_area", "Year"="year")) %>%
   arrange(Area, Year) %>%
   flextable() %>%
-  fontsize(size=11, part="all")%>%
+  fontsize(size=11, part="body")%>%
   font(part = "all", fontname = "New Times Roman") %>%
   align(#j = c("NPT","HAL", "POT", "PTR", "HAL", "Sum"), 
     align = "right", part="all") %>%
+  line_spacing(space = 0.25, part = "body")%>%
   set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".1. Total ", params$name, " catch (mt) by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
 
 ```
@@ -318,6 +319,7 @@ fig5dat%>%
   flextable() %>%
     fontsize(size=11, part="all")%>%
   font(part = "all", fontname = "New Times Roman") %>%
+    line_spacing(space = 0.25, part = "body")%>%
   set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
 ```
 
@@ -350,6 +352,7 @@ fig6dat%>%
      arrange(Area, Year) %>%
   flextable() %>%
     fontsize(size=11, part="all")%>%
+    line_spacing(space = 0.25, part = "body")%>%
   font(part = "all", fontname = "New Times Roman") %>%
   set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " otoliths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
 
@@ -399,16 +402,21 @@ theme_doc<- function(base_size = 12, base_family = "Arial") { #this function set
     )
 }
 
-mgmt_colors<-c("#B2282E","#575195","#BC4700","#4C9C2E","#00467f","#1ECAD3")
 
-gear_colors<-c("#93D500", "#007934","#FF8300", "#0093D0","#7F7FFF")
 
+#mgmt_colors<-c("#B2282E","#575195","#BC4700","#4C9C2E","#00467f","#1ECAD3")
+
+#gear_colors<-c("#93D500", "#007934","#FF8300", "#0093D0","#7F7FFF")
+
+gear_colors <- c("#440154", "#31688E", "#35B779", "#FDE725","#6EDE76" )
 
   ggplot(fig1dat, aes(x=as.factor(year), y=catch_mt/1000, 
                                fill = gear, color = gear))+
   geom_bar(position = position_stack(), stat = "identity", show.legend = T, width=1)+
   facet_grid(rows=vars(mgmt_area), cols=vars(retained_or_discarded))+
   labs(x = "Year", y = "Catch (thousand mt)")+
+    # scale_fill_viridis_d()+
+    # scale_color_viridis_d()+
   scale_color_manual(values=gear_colors)+
   scale_fill_manual(values=gear_colors)+
   #scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
@@ -481,8 +489,10 @@ fig3a <- ggplot(fig3dat, aes(x=as.factor(year), y=totcatch/10000, fill=obs_cover
   geom_bar(position = position_stack(), stat = "identity", show.legend=FALSE, width=1)+
   facet_grid(mgmt_area~gear)+
   labs(x = "Year", y = "Catch (ten thousand mt)")+
-  scale_color_manual(values=coverage_colors)+
-  scale_fill_manual(values=coverage_colors)+
+      scale_fill_viridis_d()+
+    scale_color_viridis_d()+
+  #scale_color_manual(values=coverage_colors)+
+  #scale_fill_manual(values=coverage_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 4))+
     scale_y_continuous(n.breaks=3)+
   theme_doc()+
@@ -492,9 +502,11 @@ fig3b <- ggplot(fig3dat, aes(x=as.factor(year), y=prop_catch, fill=obs_coverage,
   geom_bar(position = position_fill(), stat = "identity", width=1)+
   facet_grid(mgmt_area~gear)+
   labs(x = "Year", y = "Proportion")+
+      scale_fill_viridis_d()+
+    scale_color_viridis_d()+
   scale_y_continuous(breaks=c(0,1))+
-  scale_color_manual(values=coverage_colors)+
-  scale_fill_manual(values=coverage_colors)+
+  #scale_color_manual(values=coverage_colors)+
+  #scale_fill_manual(values=coverage_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   theme_doc()+
   theme(strip.text.y=element_text(size=10,colour='black', angle=360))
@@ -529,8 +541,10 @@ fig4a <- ggplot(obs_prop, aes(x=as.factor(year), y=catch_mt/1000, fill=Coverage,
   facet_grid(mgmt_area~gear)+
   labs(x = "Year", y = "Catch (thousand mt)")+
   scale_y_continuous(n.breaks=3)+
-  scale_color_manual(values=biol_colors)+
-  scale_fill_manual(values=biol_colors)+
+        scale_fill_viridis_d()+
+    scale_color_viridis_d()+
+  # scale_color_manual(values=biol_colors)+
+  # scale_fill_manual(values=biol_colors)+
   theme_doc()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = "none",
@@ -542,8 +556,10 @@ fig4b <- ggplot(obs_prop, aes(x=as.factor(year), y=prop_catch, fill=Coverage, co
   facet_grid(mgmt_area~gear)+
   labs(x = "Year", y = "Proportion")+
   scale_y_continuous(breaks=c(0,1))+
-  scale_color_manual(values=biol_colors)+
-  scale_fill_manual(values=biol_colors)+
+  scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  # scale_color_manual(values=biol_colors)+
+  # scale_fill_manual(values=biol_colors)+
   theme_doc()+
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         legend.position = "bottom",
@@ -561,8 +577,10 @@ fig5_lnum <-ggplot(fig5dat,aes(x=as.factor(year),y=n_length/1000,fill=gear))+
   geom_bar(position="stack", stat="identity", show.legend = F)+
   labs(y="Thousands of lengths collected", x = "Year", title="Lengths Collected")+
     scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
-    scale_color_manual(values=gear_colors)+
-  scale_fill_manual(values=gear_colors)+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  #   scale_color_manual(values=gear_colors)+
+  # scale_fill_manual(values=gear_colors)+
   facet_grid(mgmt_area~.)+
   theme_doc()+
   theme(legend.position="none",
@@ -572,8 +590,10 @@ fig5_lprop <- ggplot(fig5dat,aes(x=as.factor(year),y=n_length,fill=gear))+
   geom_bar(position="fill", stat="identity")+
   labs(y="Proportion", x = "Year", title="Proportion of Total Lengths")+
   facet_grid(mgmt_area~.)+
-    scale_color_manual(values=gear_colors)+
-  scale_fill_manual(values=gear_colors)+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  #   scale_color_manual(values=gear_colors)+
+  # scale_fill_manual(values=gear_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   scale_y_continuous(breaks=c(0,1))+
   theme_doc()+
@@ -595,8 +615,10 @@ fig6_anum <-ggplot(fig6dat,aes(x=as.factor(year),y=n_otolith/1000,fill=gear))+
   geom_bar(position="stack", stat="identity", show.legend = F)+
   labs(y="Otoliths Collected (thousands)", x = "Year", title="Sampled Otoliths")+
   facet_grid(mgmt_area~.)+
-  scale_color_manual(values=gear_colors)+
-  scale_fill_manual(values=gear_colors)+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  # scale_color_manual(values=gear_colors)+
+  # scale_fill_manual(values=gear_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   scale_y_continuous(n.breaks=3)+
   theme_doc()+
@@ -606,8 +628,10 @@ fig6_aprop <- ggplot(fig6dat,aes(x=as.factor(year),y=n_otolith,fill=gear))+
   geom_bar(position="fill", stat="identity")+
   labs(y="Proportion", x = "Year", title="Proportion of Total Otoliths")+
   facet_grid(mgmt_area~.)+
-  scale_color_manual(values=gear_colors)+
-  scale_fill_manual(values=gear_colors)+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  # scale_color_manual(values=gear_colors)+
+  # scale_fill_manual(values=gear_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   scale_y_continuous(breaks=c(0,1))+
   theme_doc()+
@@ -649,8 +673,10 @@ fig7a <-ggplot(fig7dat_a, aes(x=as.factor(year), y=lratio, fill= mgmt_area))+
   geom_bar(position="stack", stat="identity", show.legend=FALSE)+
   labs(y="Number of lengths/mt", x = "Year", title="Lengths/mt by Area")+
   facet_grid(~mgmt_area~., scales="free")+
-    scale_color_manual(values=mgmt_colors)+
-  scale_fill_manual(values=mgmt_colors)+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  #   scale_color_manual(values=mgmt_colors)+
+  # scale_fill_manual(values=mgmt_colors)+
     scale_y_continuous(n.breaks=3)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   theme_doc()
@@ -659,8 +685,10 @@ fig7b <-ggplot(fig7dat_b, aes(x=as.factor(year), y=lratio, fill= gear))+
   geom_bar(position="stack", stat="identity", show.legend=FALSE)+
   labs(y="Number of lengths/mt", x = "Year", title="Lengths/mt by Gear")+
   facet_grid(~gear~., scales="free")+
-    scale_color_manual(values=gear_colors)+
-  scale_fill_manual(values=gear_colors)+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  #   scale_color_manual(values=gear_colors)+
+  # scale_fill_manual(values=gear_colors)+
     scale_y_continuous(n.breaks=3)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   theme_doc()
@@ -702,8 +730,10 @@ fig8a <-ggplot(fig8dat_a, aes(x=as.factor(year), y=oratio, fill= mgmt_area))+
   geom_bar(position="stack", stat="identity", show.legend=FALSE)+
   labs(y="Number otoliths/mt", x = "Year", title="Otoliths/mt by area")+
   facet_grid(~mgmt_area~., scales="free")+
-  scale_color_manual(values=mgmt_colors)+
-  scale_fill_manual(values=mgmt_colors)+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  # scale_color_manual(values=mgmt_colors)+
+  # scale_fill_manual(values=mgmt_colors)+
   scale_y_continuous(n.breaks=3)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   theme_doc()
@@ -711,8 +741,10 @@ fig8a <-ggplot(fig8dat_a, aes(x=as.factor(year), y=oratio, fill= mgmt_area))+
 fig8b <-ggplot(fig8dat_b, aes(x=as.factor(year), y=oratio, fill= gear))+
   geom_bar(position="stack", stat="identity", show.legend=FALSE)+
   labs(y="Number otoliths/mt", x = "Year", title="Otoliths/mt by gear")+
-  scale_color_manual(values=gear_colors)+
-  scale_fill_manual(values=gear_colors)+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  # scale_color_manual(values=gear_colors)+
+  # scale_fill_manual(values=gear_colors)+
   scale_y_continuous(n.breaks=3)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   facet_grid(~gear~., scales="free")+
@@ -728,32 +760,39 @@ grid.arrange(fig8a, fig8b, nrow=1) %>%
 ```{r fig9, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".9. The proportion of ",  params$name," lengths that were measured at-sea versus in ports by observers. At-sea sampling provides haul level information, while shoreshide is lower resolution trip level information. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 norln<-norln%>%mutate(obs_source=recode_factor(monitoring_status,"AT_SEA_WITH_SALMON_CENSUS"="At-Sea", "AT_SEA"="At-Sea","TRAWL_EM_WITH_SHORESIDE"="Shoreside", "NO_MONITORING"="Shoreside"))
 
+norln$obs_source2 <- addNA(norln$obs_source)
+levels(norln$obs_source2) <- c(levels(norln$obs_source), "Unavailable")
+
 fig9dat_a<-norln %>%
   mutate(year=as.character(year)) %>%
-  group_by(year, mgmt_area, obs_source) %>%
+  group_by(year, mgmt_area, obs_source2) %>%
     summarize(n_length=sum(n_length))
 
 fig9dat_b<-norln %>%
   mutate(year=as.character(year)) %>%
-  group_by(year, gear, obs_source) %>%
+  group_by(year, gear, obs_source2) %>%
     summarize(n_length=sum(n_length))
     
-fig9a <- ggplot(fig9dat_a,aes(x=as.factor(year),y=n_length,fill=obs_source))+
+fig9a <- ggplot(fig9dat_a,aes(x=as.factor(year),y=n_length,fill=obs_source2))+
   geom_bar(position="fill", stat="identity", show.legend=FALSE)+
   labs(y="Proportion", x = "Year", title="Proportion of Lengths by Area")+
   facet_grid(mgmt_area~.)+
-    scale_color_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
-  scale_fill_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  #   scale_color_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
+  # scale_fill_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   scale_y_continuous(n.breaks=2)+
   theme_doc()
 
-fig9b <- ggplot(fig9dat_b,aes(x=as.factor(year),y=n_length,fill=obs_source))+
+fig9b <- ggplot(fig9dat_b,aes(x=as.factor(year),y=n_length,fill=obs_source2))+
   geom_bar(position="fill", stat="identity")+
   labs(y="Proportion", x = "Year", title="Proportion of Lengths by Gear")+
   facet_grid(gear~.)+
-    scale_color_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
-  scale_fill_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
+    scale_fill_viridis_d()+
+  scale_color_viridis_d()+
+  #   scale_color_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
+  # scale_fill_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   scale_y_continuous(n.breaks=2)+
   theme_doc()
@@ -766,7 +805,7 @@ grid.arrange(fig9a, fig9b, nrow=2)
 
 
 
-```{r fig10, eval=FALSE, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".10. The proportion of ",  params$name," fixed gear catch with electronic monitoring (black) and the rate of length sampling (lengths per metric ton; red). Values are scaled to a mean of zero for comparison. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)")}
+```{r fig10old, eval=FALSE, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".10. The proportion of ",  params$name," fixed gear catch with electronic monitoring (black) and the rate of length sampling (lengths per metric ton; red). Values are scaled to a mean of zero for comparison. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)")}
 
 #https://finchstudio.io/blog/ggplot-dual-y-axes/
 #for two y axes
@@ -856,15 +895,12 @@ scaleFUN <- function(x) sprintf("%.0f", x)
 scale=10
 
 ggplot() +
-  geom_line(data=fig10propEM%>%filter(mgmt_area=='WGOA'), aes(x=year, y=prop_em, color="Proportion EM"), size=1)+
-  geom_line(data=fig10lnmt%>%filter(mgmt_area=='WGOA'), aes(x=year, y=lratio/scale, color="Lengths/mt"), size=1)+
+  geom_line(data=fig10propEM, aes(x=year, y=prop_em, color="Proportion EM"), size=1)+
+  geom_line(data=fig10lnmt, aes(x=year, y=lratio/scale, color="Lengths/mt"), size=1)+
   facet_wrap(~mgmt_area, ncol=1)+
-    #facet_wrap(~mgmt_area, ncol=1)+
-  #scale_x_continuous(breaks = seq(0, 336, 24)) +
   scale_y_continuous(sec.axis = sec_axis(~.*scale, name="Lengths/mt")) +
   labs(x = "", y = "Proportion EM", color = "") +
-  scale_color_manual(values = c("orange2", "gray30"))+
-  #scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
+  scale_color_manual(values = c("black", "red"))+
     scale_x_continuous(labels=scaleFUN)+
   theme_doc()
 ```
