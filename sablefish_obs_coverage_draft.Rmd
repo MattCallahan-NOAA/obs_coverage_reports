@@ -234,6 +234,7 @@ norage$gear <- factor(norage$akr_gear,
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 # Note that the report was originally written with figure specific data subsets that were then used for tables. 
 
+
 #divide into retained and discarded
 fig1dat<-casdat %>% 
   filter(retained_or_discarded=="R") %>%
@@ -264,6 +265,7 @@ fig1sum<-fig1dat %>%
                           ",",
                           substring(Sum, nchar(Sum) - 2, nchar(Sum)))))
 
+tab1cap<-paste0("Table ", params$chapter, ".", params$appendix, ".1. Total ", params$name, " catch (mt) by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
 
 fig1dat%>%
   filter(retained_or_discarded=="Total") %>%
@@ -285,10 +287,13 @@ fig1dat%>%
   flextable() %>%
   fontsize(size=11, part="body")%>%
   font(part = "all", fontname = "New Times Roman") %>%
-  align(#j = c("NPT","HAL", "POT", "PTR", "HAL", "Sum"), 
-    align = "right", part="all") %>%
-  line_spacing(space = 0.25, part = "body")%>%
-  set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".1. Total ", params$name, " catch (mt) by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
+  #align(align = "right", part="body") %>%
+  align(align = "left", part="all") %>%
+  line_spacing(space = 0.3, part = "body")%>%
+  add_header_lines(values = tab1cap) %>%
+  border(part = "head", i = 1,
+         border = list("width" = 0, color = "black", style = "solid"))
+  # set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".1. Total ", params$name, " catch (mt) by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
 
 ```
 
@@ -308,6 +313,8 @@ lnsum<-fig5dat %>%
   summarize(Sum=round(sum(n_length),0))
 
 #create table
+tab2cap<-paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+
 fig5dat%>%
   mutate(Year=year,
          Area=mgmt_area) %>%
@@ -319,8 +326,12 @@ fig5dat%>%
   flextable() %>%
     fontsize(size=11, part="all")%>%
   font(part = "all", fontname = "New Times Roman") %>%
-    line_spacing(space = 0.25, part = "body")%>%
-  set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
+    line_spacing(space = 0.3, part = "body")%>%
+    add_header_lines(values = tab2cap) %>%
+  align(align = "left", part="all") %>%
+  border(part = "head", i = 1,
+         border = list("width" = 0, color = "black", style = "solid"))
+  # set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
 ```
 
 
@@ -342,6 +353,8 @@ osum<-fig6dat %>%
   summarize(Sum=round(sum(n_otolith),0))
 
 #create table
+tab3cap<-paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " otoliths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+
 fig6dat%>%
   mutate(Year=year,
          Area=mgmt_area) %>%
@@ -352,9 +365,13 @@ fig6dat%>%
      arrange(Area, Year) %>%
   flextable() %>%
     fontsize(size=11, part="all")%>%
-    line_spacing(space = 0.25, part = "body")%>%
+    line_spacing(space = 0.3, part = "body")%>%
   font(part = "all", fontname = "New Times Roman") %>%
-  set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " otoliths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
+  add_header_lines(values = tab3cap) %>%
+  align(align = "left", part="all") %>%
+  border(part = "head", i = 1,
+         border = list("width" = 0, color = "black", style = "solid"))
+  # set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " otoliths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
 
 ```
 
