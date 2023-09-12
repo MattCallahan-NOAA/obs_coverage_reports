@@ -1,7 +1,4 @@
 ---
-title: "deletemetoo"
-author: "Cara Rodgveller, Cindy Tribuzio, Matt Callahan"
-date: "`r Sys.Date()`"
 output: 
   word_document:
     reference_docx: "StckAssess-format2.docx"
@@ -13,9 +10,14 @@ params:
   chapter: "19"
   appendix: "A"
 ---
+
+## Appendix `r params$chapter`.`r params$appendix` Observer Coverage and Sampling of the `r params$name_cap` Stock
+
+
 $$
 \textbf{Cara Rodgveller, Cindy Tribuzio, Matt Callahan}
 $$
+
 
 $$
 \textbf{`r Sys.Date()`}

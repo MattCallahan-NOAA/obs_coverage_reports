@@ -1,5 +1,4 @@
 ---
-title: "Appendix 19.A. Evaluation of stocks"
 output: 
   word_document:
     keep_md: yes
@@ -12,6 +11,9 @@ params:
   chapter: "19"
   appendix: "A"
 ---
+## Appendix `r params$chapter`.`r params$appendix` Observer Coverage and Sampling of the `r params$name_cap` Stock
+
+
 
 $$
 \textbf{Cindy Tribuzio, Cara Rodgveller, Matt Callahan}
@@ -24,30 +26,11 @@ $$
 
 # Introduction
 
-This report summarizes the fishery-dependent observer data that are available and inform the Gulf of Alaska (GOA) and Bering Sea/Aleutian Islands (BSAI) ‘r doc_name’ stock assessment. Logbook, eLandings, and fish ticket data are not included here. The format of this report is under development and should be considered a draft. Data are queried from the Alaska Regional Office Catch Accounting System (CAS) and AKFIN. The results are based on total catch estimates and observer deployment information. Due to minor differences in observer strata assignments between CAS and what vessels log into the Observer Declare and Deploy System the total catch estimates may be slightly different from those values reported in the North Pacific Observer Program Annual Reports. Any differences are expected to be minor. Data prior to the 2013 North Pacific Observer Program Restructure are not included in the analyses presented here due to structural changes.
+This report provides total catch estimates from the Alaska Regional Office Catch Accounting System (CAS), based on landings, fishery observations, and other data sources. Fishery observations and biological samples are collected by the North Pacific Groundfish Observer Program and the Alaska Fisheries Science Center (AFSC) Fishery Monitoring and Analysis program (FMA). A description of the observer strata is in the “Additional Information” section at the end of this document. More details are available in the North Pacific Groundfish Observer Program Annual Deployment Plans and Annual Reports produced by the FMA. All CAS and observer data were queried through the AKFIN database.
+The goals of this report are to present how much of the `r name` stock catch was observed by the North Pacific Observer Program and how many biological samples were collected by observers by Fishery Management Plan Subareas and gear types. The total catch of the stock by area and gear is reported in Figure 1 and Table 1. First, the vessel is assigned to an observer stratum in the Observer Deployment and Declare System (ODDS). Figure 3  summarizes how much catch was from trips assigned to each observer stratum, including partial coverage, electronic monitoring (EM) partial coverage, full coverage, or no coverage. This is a representation of how much catch was attributed to trips in each stratum in ODDS and not how much catch was actually observed. 
+Table XX  summarizes how much of the catch was actually covered by observers or EM, as a percent of total catch. To see the actual catch with observer and EM coverage and the proportions of the catch with coverage in more detail, Figure 4 includes the coverage by gear type and area. The proportions for each cell are calculated using the catch by coverage type divided by the total catch in each area/grid cell annually. In other words, the proportions are the values in each catch column scaled to sum to 1.
+Lengths and otoliths are collected at-sea and in ports and the rate of collection depends on the gear and area, which is often associated with different regional fisheries (see Figure 9 for length collections). The total counts of fish sampled for lengths and otoliths are presented in Figures 5 and 6 and Tables 2 and 3. A brief summary for the stock is in Table XX. The proportion of these samples in each gear type may fluctuate through time and by area (Figures 5 and 6; Tables 2 and 3). The count of lengths and otoliths can be used with the catch to evaluate the sampling rate, by dividing the number of lengths or otoliths by the catch (e.g., lengths/mt) (Figures 7 and 8, respectively). This rate can be used to evaluate if the absolute number of biological samples has changed in line with the rate of sampling. For example, the number of lengths collected could be decreasing over time, but if the catch is also decreasing the rate may be stable. In Figure 10 the proportion of catch observed using EM (EM mt/total catch mt) is plotted alongside the sampling rate of lengths (lengths/mt), which cannot be collected with only EM.
 
-# Observer Deployment Performance
-
-This section summarizes the projected and realized observer coverage rates since 2016 for all partial coverage trips (i.e., not specific to any fishery).
-Observer strata are defined in the North Pacific Observer Program Annual Reports as follows: Full Coverage - catcher/processors (with limited exceptions), motherships, catcher vessels that are participating in programs that have transferable prohibited species catch, catcher vessels using trawl gear that have requested full coverage for all fishing activity within the BSAI and inshore processors receiving or processing Bering Sea pollock.
-Partial Coverage - Catcher vessels fishing in federally managed groundfish or parallel fisheries, excepting when in full coverage, catcher vessels participating in the Pacific halibut or sablefish IFQ fisheries, catcher vessels participating in the CDQ fisheries or those \< 46ft LOA using hook-and-line gear for groundfish, catch/processors that qualify for partial coverage; and shoreside or stationary floating processors that are not in the full coverage category.
-No Coverage/Selection - vessels \< 40ft LOA, jig and exempted vessels There are two Electronic Monitoring (EM) programs in effect: fixed-gear EM and trawl EM.
-The fixed-gear EM program includes both pot and hook-and-line vessels.
-Trips logged into ODDS for that program have a partial coverage selection rate, and if selected, the vessel must run the EM cameras for the trip duration.
-After the videos are submitted, 30% of recorded hauls are reviewed and catch is fully censused.
-There are no biological samples collected from fixed-gear EM trips.
-Vessels operating in the trawl EM program record all trips and all of the videos are reviewed, however, the review is for compliance monitoring only.
-Vessels operating in the trawl EM program are required to retain all catch (with limited exceptions) for shoreside sampling by observers at the plant.
-For 2013 - 2015, the North Pacific Observer Program deployment strata included vessel level selection criteria and coverage rates are not comparable to current time series, therefore, not included in the table below.
-Full Selection trips are all assumed to be 100% covered and not reported in the table below.
-The Zero Selection trips are also not included.
-Values are from the Annual Deployment Plans and the Annual Reports, available on the NPFMC website.
-Not all observer strata were covered each year.
-For example, Hook-and-line (HAL) tender was only covered in 2017, in which a total of four trips were made and thus deemed not a useful strata to include.
-In 2020, observer sampling was significantly impacted March-June due to the pandemic, resulting in minimal coverage during those months and reducing the annual realized coverage rates.
-The trawl EM EFP went into effect in 2020, in this strata all trips have 100% of video reviewed for compliance monitoring, and full retention is in effect.
-Observer sampling occurs shoreside with the target of all Trawl EM EFP deliveries being observer sampled in the BSAI and 30% in the GOA.
-The below table only documents partial coverage rates.
 
 ```{r load-packages, include=FALSE}
 library(tidyverse)
@@ -377,15 +360,57 @@ fig6dat%>%
 
 
 
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+# .	This data is like the bottom panel of fig 4 (actual coverage of catch - %). Will now have a fig and table.
+
+areagear_tot <- casdat %>% 
+  filter(gear != "JIG") %>% 
+  group_by(year, mgmt_area, gear) %>% 
+  summarise(totcatch = sum(catch_mt))
+
+obs_prop <- casdat %>% 
+  filter(agency_gear_code != "JIG") %>% 
+  group_by(year, mgmt_area, observed, gear) %>% 
+  summarise(catch_mt = sum(catch_mt)) %>% 
+  inner_join(areagear_tot, by = c("year", "mgmt_area","gear")) %>% 
+  mutate(prop_catch = catch_mt/totcatch,
+         Coverage = recode(observed, "Catch Only"="EM", "Catch/Biologicals"="Observer", "None"="No Coverage"))
+
+obs_prop$Coverage<- factor(obs_prop$Coverage, levels=c("EM","Observer","No Coverage"))
+
+tab4cap<-paste0("Table ", params$chapter, ".", params$appendix, ".4. The proportion of", params$name, " catch observed by observers or electronic monitoring (EM) by area and gear for the most recent five years and the average proportions from 2013 through the current year. The remainder of the catch had no observer coverage. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+
+#create regional averages
+tab4avg<-obs_prop%>%
+  mutate(Year=year,
+         Area=mgmt_area) %>%
+  
+  
+obs_prop%>%
+  mutate(Year=year,
+         Area=mgmt_area) %>%
+  dplyr::select(Area, Year,  gear, n_otolith) %>%
+  pivot_wider(id_cols=c(Area, Year), names_from=gear, values_from=n_otolith) %>%
+  left_join(osum, by=c("Area"="mgmt_area", "Year"="year")) %>%
+    mutate(Year=as_factor(Year)) %>%
+     arrange(Area, Year) %>%
+  flextable() %>%
+    fontsize(size=11, part="all")%>%
+    line_spacing(space = 0.3, part = "body")%>%
+  font(part = "all", fontname = "New Times Roman") %>%
+  add_header_lines(values = tab3cap) %>%
+  align(align = "left", part="all") %>%
+  border(part = "head", i = 1,
+         border = list("width" = 0, color = "black", style = "solid"))
+
+
+```
 
 
 
 
 # Figures
 
-![Figure i. Map of Fisheries Management Plan subareas. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).](fmp_subarea.png)
-
-\newpage
 
 ```{r fig1, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".1. ", params$name_cap ," catch by gear type that was either the total of retained  and discarded, retained, or discarded by management area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 
@@ -447,45 +472,6 @@ gear_colors <- c("#440154", "#31688E", "#35B779", "#FDE725","#6EDE76" )
 
 \newpage
 
-```{r fig2, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".2. Proportion of fixed gear ", params$name," catch in pots in the Gulf of Alaska (dashed line), the Bering Sea and Aleutian Islands (dotted line), and both combined (solid line). Jig gear is excluded.")}
-#process data
-fig2dat<-casdat%>%
-  #filter to fixed gear
-  filter(gear %in% c("HAL", "POT")) %>%
-  #calculate total for all fixed gear
-  group_by(year, fmp_area) %>%
-  summarize(fixed_gear_catch=sum(catch_mt)) %>%
-  #add column for pot gear only
-  left_join(casdat%>%
-  #filter to pot
-  filter(gear == "POT") %>%
-  #calculate total for pot
-  group_by(year, fmp_area) %>%
-  summarize(pot_catch=sum(catch_mt)), 
-  by=c("year"="year", "fmp_area"="fmp_area")) %>%
-  mutate(prop_pot=pot_catch/fixed_gear_catch)
-
-
-fig2<-ggplot()+
-  geom_line(data=fig2dat%>%filter(fmp_area=="BSAI"), aes(x=as.numeric(year), y=prop_pot), size=1, lty=3)+
-    geom_line(data=fig2dat%>%filter(fmp_area=="GOA"), aes(x=as.numeric(year), y=prop_pot), size=1, lty=2)+
-  geom_line(data=fig2dat%>%group_by(year) %>% 
-              summarize(fixed_gear_catch=sum(fixed_gear_catch),
-                        pot_catch=sum(pot_catch)) %>% 
-              mutate(prop_pot=pot_catch/fixed_gear_catch), 
-            aes(x=as.numeric(year), y=prop_pot), size=1, lty=1)+
-  #facet_wrap(~fmp_area)+
-  scale_x_continuous(breaks = seq(startyear, endyear, by = 1))+
-  ylim(c(0,1))+
-  xlab("Year")+ ylab("Pot proportion")+
-  ggtitle("Proportion of Fixed Gear Catch in Pots")+
-  theme_doc()+
-  theme(plot.title = element_text(hjust = 0.5))
-suppressWarnings(fig2)
-```
-
-\newpage
-
 ```{r fig3, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".3. ",params$name_cap," catch in each observer coverage category in the Observer Deploy and Declare System (ODDS), including fixed gear electronic monitoring (EM). This catch was not necessarily observed. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 #set plotting order
 casdat$obs_coverage<-factor(casdat$obs_coverage, levels = c("Partial", "EM Partial", "Full", "None"))
@@ -497,15 +483,15 @@ fig3dat<-casdat %>%
   group_by(year, mgmt_area, obs_coverage, gear) %>% 
   summarise(catch_mt = sum(catch_mt)) %>% 
   inner_join(casdat %>% 
-  group_by(year, mgmt_area) %>% 
-  summarise(totcatch = sum(catch_mt)), by = c("year", "mgmt_area")) %>% 
+  group_by(year, mgmt_area, gear) %>% 
+  summarise(totcatch = sum(catch_mt)), by = c("year", "mgmt_area", "gear")) %>% 
   mutate(prop_catch = catch_mt/totcatch) %>% 
   filter(gear != "JIG")
 
-fig3a <- ggplot(fig3dat, aes(x=as.factor(year), y=totcatch/10000, fill=obs_coverage, color=obs_coverage))+
+fig3a <- ggplot(fig3dat, aes(x=as.factor(year), y=catch_mt/1000, fill=obs_coverage, color=obs_coverage))+
   geom_bar(position = position_stack(), stat = "identity", show.legend=FALSE, width=1)+
   facet_grid(mgmt_area~gear)+
-  labs(x = "Year", y = "Catch (ten thousand mt)")+
+  labs(x = "Year", y = "Catch (thousand mt)")+
       scale_fill_viridis_d()+
     scale_color_viridis_d()+
   #scale_color_manual(values=coverage_colors)+
@@ -527,7 +513,7 @@ fig3b <- ggplot(fig3dat, aes(x=as.factor(year), y=prop_catch, fill=obs_coverage,
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   theme_doc()+
   theme(strip.text.y=element_text(size=10,colour='black', angle=360))
-grid.arrange(fig3a, fig3b, nrow=2)
+suppressWarnings(grid.arrange(fig3a, fig3b, nrow=2))
 
   
 ```
@@ -537,20 +523,7 @@ grid.arrange(fig3a, fig3b, nrow=2)
 #biol_colors<-c("#625BC4","#AAD7DD","#D02C2F" )
 biol_colors<-c("#575195","#1ECAD3","#FF8300")
   
-areagear_tot <- casdat %>% 
-  filter(gear != "JIG") %>% 
-  group_by(year, mgmt_area, gear) %>% 
-  summarise(totcatch = sum(catch_mt))
-
-obs_prop <- casdat %>% 
-  filter(agency_gear_code != "JIG") %>% 
-  group_by(year, mgmt_area, observed, gear) %>% 
-  summarise(catch_mt = sum(catch_mt)) %>% 
-  inner_join(areagear_tot, by = c("year", "mgmt_area","gear")) %>% 
-  mutate(prop_catch = catch_mt/totcatch,
-         Coverage = recode(observed, "Catch Only"="EM", "Catch/Biologicals"="Observer", "None"="No Coverage"))
-
-obs_prop$Coverage<- factor(obs_prop$Coverage, levels=c("EM","Observer","No Coverage"))
+#data definition moved to table 4
 
 fig4a <- ggplot(obs_prop, aes(x=as.factor(year), y=catch_mt/1000, fill=Coverage, color=Coverage))+
   geom_bar(position = position_stack(), stat = "identity", width=1)+
@@ -819,76 +792,18 @@ grid.arrange(fig9a, fig9b, nrow=2)
 ```
 
 
-
-
-
-```{r fig10old, eval=FALSE, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".10. The proportion of ",  params$name," fixed gear catch with electronic monitoring (black) and the rate of length sampling (lengths per metric ton; red). Values are scaled to a mean of zero for comparison. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)")}
+```{r fig10,  warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".10. The proportion of ",  params$name," catch with electronic monitoring (red) and the rate of length sampling (lengths per metric ton; black) for all gear types. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)")}
 
 #https://finchstudio.io/blog/ggplot-dual-y-axes/
 #for two y axes
 
 fig10propEM <- casdat %>%
-  filter(gear %in% c("POT", "HAL") &
+  filter(#gear %in% c("POT", "HAL") &
            obs_coverage == "EM Partial") %>%
   group_by(mgmt_area, year) %>%
   summarize(em_catch=sum(catch_mt)) %>%
   left_join(casdat %>%
-  filter(gear %in% c("POT", "HAL")) %>%
-  group_by(mgmt_area, year) %>%
-  summarize(total_catch=sum(catch_mt)),
-  by=c("year"="year", "mgmt_area"="mgmt_area")) %>%
-  mutate(prop_em=em_catch/total_catch,
-         year=as.numeric(year)) %>%
-  group_by(mgmt_area) %>%
-  mutate(prop_em_scaled=scale(prop_em)) %>%
-  ungroup()
-
-fig10lnmt <- norln%>%
-  filter(gear %in% c("POT","HAL") ) %>%
-  group_by(year, mgmt_area) %>%
-  summarize(n_length=sum(n_length)) %>% 
-  left_join(casdat%>%
-              filter(gear %in% c("POT","HAL")) %>%
-              mutate(year=as.numeric(year))%>%
-  group_by(year, mgmt_area) %>%
-  summarize(catch_mt=sum(catch_mt)),
-  by=c("year"="year", "mgmt_area"="mgmt_area"))%>%
-  mutate(lratio=n_length/catch_mt)%>%
-  group_by(mgmt_area) %>%
-  mutate(lratio_scaled=scale(lratio))%>%
-  ungroup()
-
-scaleFUN <- function(x) sprintf("%.0f", x)
-
-ggplot()+
-  geom_line(data=fig10propEM, aes(x=year, y=prop_em_scaled, color="black"), size=1)+
-  geom_line(data=fig10lnmt, aes(x=year, y=lratio_scaled, color="red"), size=1)+
-  facet_wrap(~mgmt_area, ncol=1)+
-  scale_colour_manual(name="",  values=c('black'='black', 'red'='red'), labels=c("Proportion EM","Lengths/mt"))+
-  ylab("Scaled Lengths/mt and Proportion Catch with EM")+
-  xlab("")+
-  theme_doc()+
-  scale_x_continuous(labels=scaleFUN)
-
-
-```
-
-
-
-
-
-```{r fig10,  warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".10. The proportion of ",  params$name," fixed gear catch with electronic monitoring (black) and the rate of length sampling (lengths per metric ton; red). Values are scaled to a mean of zero for comparison. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)")}
-
-#https://finchstudio.io/blog/ggplot-dual-y-axes/
-#for two y axes
-
-fig10propEM <- casdat %>%
-  filter(gear %in% c("POT", "HAL") &
-           obs_coverage == "EM Partial") %>%
-  group_by(mgmt_area, year) %>%
-  summarize(em_catch=sum(catch_mt)) %>%
-  left_join(casdat %>%
-  filter(gear %in% c("POT", "HAL")) %>%
+  #filter(gear %in% c("POT", "HAL")) %>%
   group_by(mgmt_area, year) %>%
   summarize(total_catch=sum(catch_mt)),
   by=c("year"="year", "mgmt_area"="mgmt_area")) %>%
@@ -896,11 +811,11 @@ fig10propEM <- casdat %>%
          year=as.numeric(year)) 
 
 fig10lnmt <- norln%>%
-  filter(gear %in% c("POT","HAL") ) %>%
+  #filter(gear %in% c("POT","HAL") ) %>%
   group_by(year, mgmt_area) %>%
   summarize(n_length=sum(n_length)) %>% 
   left_join(casdat%>%
-              filter(gear %in% c("POT","HAL")) %>%
+              #filter(gear %in% c("POT","HAL")) %>%
               mutate(year=as.numeric(year))%>%
   group_by(year, mgmt_area) %>%
   summarize(catch_mt=sum(catch_mt)),
@@ -910,14 +825,49 @@ fig10lnmt <- norln%>%
 scaleFUN <- function(x) sprintf("%.0f", x)
 
 scale=10
+nyears<-length(unique(fig10lnmt$year))
 
+suppressWarnings(
 ggplot() +
-  geom_line(data=fig10propEM, aes(x=year, y=prop_em, color="Proportion EM"), size=1)+
+  geom_line(data=fig10propEM, aes(x=year, y=prop_em, color="Catch with EM/Total Catch (mt)"), size=1)+
   geom_line(data=fig10lnmt, aes(x=year, y=lratio/scale, color="Lengths/mt"), size=1)+
-  facet_wrap(~mgmt_area, ncol=1)+
+  facet_wrap(~mgmt_area, ncol=1, scales="free_y")+
   scale_y_continuous(sec.axis = sec_axis(~.*scale, name="Lengths/mt")) +
-  labs(x = "", y = "Proportion EM", color = "") +
+  labs(x = "", y = "Catch with EM/Total Catch (mt)", color = "") +
   scale_color_manual(values = c("black", "red"))+
-    scale_x_continuous(labels=scaleFUN)+
+    scale_x_continuous(labels=scaleFUN, n.breaks=nyears)+
   theme_doc()
+)
+
+#try reversing y axes
+# ggplot() +
+#     geom_line(data=fig10lnmt, aes(x=year, y=lratio/scale, color="Lengths/mt"), size=1)+
+#   geom_line(data=fig10propEM, aes(x=year, y=prop_em, color="Catch with EM/Total Catch (mt)"), size=1)+
+#   facet_wrap(~mgmt_area, ncol=1, scales="free_y")+
+#   scale_y_continuous(sec.axis = sec_axis(~.*scale, name="Catch with EM/Total Catch (mt)")) +
+#   labs(x = "", y = "Lengths/mt", color = "") +
+#   scale_color_manual(values = c("red", "black"))+
+#     scale_x_continuous(labels=scaleFUN)+
+#   theme_doc()
 ```
+
+
+# Additional Information 
+
+**Biological Collections**
+•	Lengths (mm), weight (tenth of a kg), and sagittal otoliths are collected by observers at-sea and at processing plants when North Pacific Groundfish Observer Program protocols call for collections. Otoliths are not collected from all fish that have lengths and weights recorded. Weights are collected when otoliths are collected.
+**Observer strata in the North Pacific Groundfish Observer Program**
+•	Full Coverage - Catcher/processors (with limited exceptions), motherships, catcher vessels that are participating in programs that have transferable prohibited species catch, catcher vessels using trawl gear that have requested full coverage for all fishing activity within the Bering Sea/Aleutian Islands FMP, and inshore processors receiving or processing Bering Sea pollock. Full coverage trips are all assumed to be 100% covered.
+•	Partial Coverage - Catcher vessels fishing in federally managed groundfish or parallel fisheries, excepting when in full coverage, catcher vessels participating in the Pacific halibut or sablefish IFQ fisheries, catcher vessels participating in the CDQ fisheries or those < 46ft LOA using hook-and-line gear for groundfish, catcher/processor that qualify for partial coverage, and shoreside or stationary floating processors that are not in the full coverage category are in the partial coverage category. 
+•	EM - trawl gear: Trips in this strata have EM recordings and all are reviewed. The review is for compliance monitoring only and catch is not enumerated. Vessels operating in the trawl EM program are required to retain all catch (with limited exceptions) for shoreside sampling by observers at the plant. Shoreside observer sampling targets a 100% coverage rate of all EM - trawl deliveries in the BSAI and 30% in the GOA . This strata went into effect in 2020 as an Exempted Fishing Permit program, only on non-pelagic trawl vessels targeting Pollock, and is becoming regulated for the 2024 fishery. 
+•	EM - fixed-gear: Includes both pot and hook-and-line vessels. Trips logged into ODDS have a partial coverage selection rate and, if selected, the vessel must record all hauls during that trip duration. After the videos are submitted, 30% of recorded hauls are reviewed and catch is fully censused along with discard status of each fish. There are no biological samples collected from fixed-gear EM trips. 
+•	EM note - EM fixed gear is a completely different program from EM non-pelagic trawl, with different origins, directives and methodologies.
+•	No Coverage or Zero Selection - Vessels < 40ft LOA, jig and exempted vessels.
+**Caveats**
+•	Data prior to the 2013 North Pacific Observer Program restructure are not included in the analyses presented here due to structural changes.
+•	Not all observer strata were covered each year. For example, hook and line (HAL) tender was only covered in 2017, in which a total of four trips were made and thus deemed not a useful strata to include. 
+•	2020 - Observer sampling was significantly impacted March-June due to the pandemic, resulting in minimal coverage during those months and reducing the annual realized coverage rates. 
+
+# References
+North Pacific Observe Program: https://www.fisheries.noaa.gov/alaska/fisheries-observers/north-pacific-observer-program
+
