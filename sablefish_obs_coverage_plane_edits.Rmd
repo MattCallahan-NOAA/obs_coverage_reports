@@ -26,9 +26,12 @@ $$
 
 # Introduction
 
-This report provides total catch estimates from the Alaska Regional Office Catch Accounting System (CAS), based on landings, fishery observations, and other data sources. Fishery observations and biological samples are collected by the North Pacific Groundfish Observer Program and the Alaska Fisheries Science Center (AFSC) Fishery Monitoring and Analysis program (FMA). A description of the observer strata is in the “Additional Information” section at the end of this document. More details are available in the North Pacific Groundfish Observer Program Annual Deployment Plans and Annual Reports produced by the FMA. All CAS and observer data were queried through the AKFIN database.
-The goals of this report are to present how much of the `r params$name` stock catch was observed by the North Pacific Observer Program and how many biological samples were collected by observers by Fishery Management Plan Subareas and gear types. The total catch of the stock by area and gear is reported in Figure 1 and Table 1. First, the vessel is assigned to an observer stratum in the Observer Deployment and Declare System (ODDS). Figure 3  summarizes how much catch was from trips assigned to each observer stratum, including partial coverage, electronic monitoring (EM) partial coverage, full coverage, or no coverage. This is a representation of how much catch was attributed to trips in each stratum in ODDS and not how much catch was actually observed. 
-Table XX  summarizes how much of the catch was actually covered by observers or EM, as a percent of total catch. To see the actual catch with observer and EM coverage and the proportions of the catch with coverage in more detail, Figure 4 includes the coverage by gear type and area. The proportions for each cell are calculated using the catch by coverage type divided by the total catch in each area/grid cell annually. In other words, the proportions are the values in each catch column scaled to sum to 1.
+This report provides total catch estimates from the Alaska Regional Office Catch Accounting System (CAS), based on landings, fishery observations, and other data sources. Fishery observations and biological samples are collected by the North Pacific Groundfish Observer Program and the Alaska Fisheries Science Center (AFSC) Fishery Monitoring and Analysis program (FMA). A description of the observer strata is in the “Additional Information” section at the end of this document. More details are available in the North Pacific Groundfish Observer Program Annual Deployment Plans and Annual Reports produced by the FMA. All CAS and observer data were queried through the AKFIN database.  
+
+The goals of this report are to present how much of the `r params$name` stock catch was observed by the North Pacific Observer Program and how many biological samples were collected by observers by Fishery Management Plan Subareas and gear types. The total catch of the stock by area and gear is reported in Figure 1 and Table 1. First, the vessel is assigned to an observer stratum in the Observer Deployment and Declare System (ODDS). Figure 3  summarizes how much catch was from trips assigned to each observer stratum, including partial coverage, electronic monitoring (EM) partial coverage, full coverage, or no coverage. This is a representation of how much catch was attributed to trips in each stratum in ODDS and not how much catch was actually observed.   
+
+Table XX  summarizes how much of the catch was actually covered by observers or EM, as a percent of total catch. To see the actual catch with observer and EM coverage and the proportions of the catch with coverage in more detail, Figure 4 includes the coverage by gear type and area. The proportions for each cell are calculated using the catch by coverage type divided by the total catch in each area/grid cell annually. In other words, the proportions are the values in each catch column scaled to sum to 1.  
+
 Lengths and otoliths are collected at-sea and in ports and the rate of collection depends on the gear and area, which is often associated with different regional fisheries (see Figure 9 for length collections). The total counts of fish sampled for lengths and otoliths are presented in Figures 5 and 6 and Tables 2 and 3. A brief summary for the stock is in Table XX. The proportion of these samples in each gear type may fluctuate through time and by area (Figures 5 and 6; Tables 2 and 3). The count of lengths and otoliths can be used with the catch to evaluate the sampling rate, by dividing the number of lengths or otoliths by the catch (e.g., lengths/mt) (Figures 7 and 8, respectively). This rate can be used to evaluate if the absolute number of biological samples has changed in line with the rate of sampling. For example, the number of lengths collected could be decreasing over time, but if the catch is also decreasing the rate may be stable. In Figure 10 the proportion of catch observed using EM (EM mt/total catch mt) is plotted alongside the sampling rate of lengths (lengths/mt), which cannot be collected with only EM.
 
 
@@ -269,9 +272,9 @@ fig1dat%>%
   arrange(Area, Year) %>%
   flextable() %>%
   fontsize(size=11, part="body")%>%
-  font(part = "all", fontname = "New Times Roman") %>%
-  #align(align = "right", part="body") %>%
-  align(align = "left", part="all") %>%
+  font(part = "all", fontname = "Times New Roman") %>%
+  align(align = "right", part="body") %>%
+  align(align = "left", part="head") %>%
   line_spacing(space = 0.3, part = "body")%>%
   add_header_lines(values = tab1cap) %>%
   border(part = "head", i = 1,
@@ -284,149 +287,6 @@ fig1dat%>%
 \newpage
 
 
-```{r warning=FALSE, message=FALSE, echo=FALSE}
-#summarize norpac length data
-fig5dat<-norln%>%
-  group_by(year, mgmt_area, gear) %>%
-  summarize(n_length=sum(n_length))
-
-#summarize without gear calculating proportions
-lnsum<-fig5dat %>%
-  group_by(mgmt_area, year) %>%
-  summarize(Sum=round(sum(n_length),0))
-
-#create table
-tab2cap<-paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
-
-fig5dat%>%
-  mutate(Year=year,
-         Area=mgmt_area) %>%
-  dplyr::select(Area, Year,  gear, n_length) %>%
-  pivot_wider(id_cols=c(Area, Year), names_from=gear, values_from=n_length) %>%
-   left_join(lnsum, by=c("Area"="mgmt_area", "Year"="year")) %>%
-  mutate(Year=as.factor(Year)) %>%
-   arrange(Area, Year) %>%
-  flextable() %>%
-    fontsize(size=11, part="all")%>%
-  font(part = "all", fontname = "New Times Roman") %>%
-    line_spacing(space = 0.3, part = "body")%>%
-    add_header_lines(values = tab2cap) %>%
-  align(align = "left", part="all") %>%
-  border(part = "head", i = 1,
-         border = list("width" = 0, color = "black", style = "solid"))
-  # set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
-```
-
-
-
-\newpage
-
-
-
-```{r warning=FALSE, message=FALSE, echo=FALSE}
-#summarize data
-fig6dat<-norage%>%
-  filter(type_1_otolith=="Y") %>% 
-  group_by(year, mgmt_area, gear) %>%
-  summarize(n_otolith=n())
-
-#summarize without gear for proportion
-osum<-fig6dat %>%
-  group_by(mgmt_area, year) %>%
-  summarize(Sum=round(sum(n_otolith),0))
-
-#create table
-tab3cap<-paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " otoliths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
-
-fig6dat%>%
-  mutate(Year=year,
-         Area=mgmt_area) %>%
-  dplyr::select(Area, Year,  gear, n_otolith) %>%
-  pivot_wider(id_cols=c(Area, Year), names_from=gear, values_from=n_otolith) %>%
-  left_join(osum, by=c("Area"="mgmt_area", "Year"="year")) %>%
-    mutate(Year=as_factor(Year)) %>%
-     arrange(Area, Year) %>%
-  flextable() %>%
-    fontsize(size=11, part="all")%>%
-    line_spacing(space = 0.3, part = "body")%>%
-  font(part = "all", fontname = "New Times Roman") %>%
-  add_header_lines(values = tab3cap) %>%
-  align(align = "left", part="all") %>%
-  border(part = "head", i = 1,
-         border = list("width" = 0, color = "black", style = "solid"))
-  # set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " otoliths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
-
-```
-
-\newpage
-
-```{r warning=FALSE, message=FALSE, echo=FALSE}
-# .	This data is like the bottom panel of fig 4 (actual coverage of catch - %). Will now have a fig and table.
-# THIS TABLE IS NOT FULLY AUTOMATED. GEAR HEADERS NEED TO BE CHECKED (add_header_row flextable functions)
-
-areagear_tot <- casdat %>% 
-  filter(gear != "JIG") %>% 
-  group_by(year, mgmt_area, gear) %>% 
-  summarise(totcatch = sum(catch_mt))
-
-obs_prop <- casdat %>% 
-  filter(agency_gear_code != "JIG") %>% 
-  group_by(year, mgmt_area, observed, gear) %>% 
-  summarise(catch_mt = sum(catch_mt)) %>% 
-  inner_join(areagear_tot, by = c("year", "mgmt_area","gear")) %>% 
-  mutate(prop_catch = catch_mt/totcatch,
-         Coverage = recode(observed, "Catch Only"="EM", "Catch/Biologicals"="Observer", "None"="No Coverage"))
-
-obs_prop$Coverage<- factor(obs_prop$Coverage, levels=c("EM","Observer","No Coverage"))
-
-#create regional averages by gear and area
-tab4_area_gear<-obs_prop %>%
-  filter(gear!="JIG")%>%
- group_by(mgmt_area, gear) %>%
-  summarize(catch_ag=sum(catch_mt))
-#create regional avg by gear area, and coverage
-tab4_area_gear_cov<-obs_prop %>%
-  filter(gear!="JIG")%>%
-  group_by(mgmt_area, gear, Coverage) %>%
-  summarize(catch_agc=sum(catch_mt))
-#create proportions of catch for all years
-tab4_sum<-tab4_area_gear_cov%>%
-  inner_join(tab4_area_gear, by=c("mgmt_area"="mgmt_area", "gear"="gear")) %>%
-  mutate(prop_catch=catch_agc/catch_ag)
-
-#combine with obs_prop
-tab4_dat<-tab4_sum%>%
-  mutate(year="Avg")%>%
-  dplyr::select(year, mgmt_area, gear, prop_catch, Coverage) %>%
-  bind_rows(obs_prop%>%
-              filter(year %in% (endyear-4):endyear) %>%
-              dplyr::select(year, mgmt_area, gear, prop_catch, Coverage))%>%
-  mutate(perc_catch=round((prop_catch*100),0))
-
-tab4cap<-paste0("Table ", params$chapter, ".", params$appendix, ".4. The proportion of", params$name, " catch observed by observers or electronic monitoring (EM) by area and gear for the most recent five years and the average proportions from 2013 through the current year. The remainder of the catch had no observer coverage. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
-
-tab4_dat%>%
-  filter(Coverage!="No Coverage")%>%
-  mutate(Year=year, Area=mgmt_area)%>%
-    pivot_wider(id_cols=c(Area, Year), names_from=c(Coverage, gear), values_from=perc_catch)%>%
-  arrange(Area, Year) %>%
-  flextable() %>%
-  delete_part(part="header") %>%
-    fontsize(size=11, part="all")%>%
-    line_spacing(space = 0.3, part = "body")%>%
-  font(part = "all", fontname = "New Times Roman") %>%
-  add_header_row(top = TRUE, values = c("Area", "Year", "% Observer", "% Observer", "% EM", "% Observer", "% EM", "% Observer" )#, colwidths = c(1,3,3)
-                 )%>%
-  add_header_row(top = TRUE, 
-    values = c("", "", "PTR", "NPT", "POT","", "HAL", "" )#, colwidths = c(1,3,3)
-                 )%>%
-  add_header_lines(values = tab4cap) %>%
-  align(align = "left", part="all") %>%
-  border(part = "head", i = 2,
-         border = list("width" = 0, color = "black", style = "solid"))
-
-
-```
 \newpage
 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
@@ -480,7 +340,7 @@ tab5dat_ann<-fig7dat_a %>%
     filter(year %in% (endyear-4):endyear) %>%
   mutate(year=as.character(year))%>%
   dplyr::select(mgmt_area, year, catch_mt, n_length, lratio, n_otolith, oratio)
-colnames(tab5dat_ann)=c("Area", "Year", "Catch", "Lengths", "Lengths/mt", "Otoliths", "Otoliths/mt")
+colnames(tab5dat_ann)=c("Area", "Year", "Catch", "Len", "Len/mt", "Oto", "Oto/mt")
 
 
 
@@ -492,28 +352,29 @@ left_join(tab5_ln_avg, by="mgmt_area")%>%
          oto_mt=avg_oto/avg_catch,
          year="Avg")%>%
   dplyr::select(mgmt_area, year, avg_catch, n_length, ln_mt, avg_oto, oto_mt)
-colnames(tab5dat_avg)=c("Area", "Year", "Catch", "Lengths", "Lengths/mt", "Otoliths", "Otoliths/mt")
+colnames(tab5dat_avg)=c("Area", "Year", "Catch", "Len", "Len/mt", "Oto", "Oto/mt")
   
 #combine
 tab5dat<-tab5dat_ann %>%
   bind_rows(tab5dat_avg) %>%
   mutate(Catch=round(Catch,0),
-         Lengths=round(Lengths,0),
-         `Lengths/mt`=round(`Lengths/mt`,2),
-         Otoliths=round(Otoliths,0),
-         `Otoliths/mt`=round(`Otoliths/mt`,2))
+         Len=round(Len,0),
+         `Len/mt`=round(`Len/mt`,2),
+         Oto=round(Oto,0),
+         `Oto/mt`=round(`Oto/mt`,2))
 
 
-tab5cap<-paste0("Table ", params$chapter, ".", params$appendix, ".5. The total catch in mt for each area and year, the number of individual fish lengths and otoliths collected, and the rate of length and otolith sampling, as lengths per mt of catch, for the five most recent years and the average from 2013-present. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+tab5cap<-paste0("Table ", params$chapter, ".", params$appendix, ".2. The total catch in mt for each area and year, the number of individual fish lengths (len) and otoliths (oto) collected, and the rate of length and otolith sampling, as sampling per mt of catch, for the five most recent years and the average from 2013-present. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
 
 tab5dat%>%
   arrange(Area)%>%
     flextable() %>%
     fontsize(size=11, part="all")%>%
     line_spacing(space = 0.3, part = "body")%>%
-  font(part = "all", fontname = "New Times Roman") %>%
+  font(part = "all", fontname = "Times New Roman") %>%
   add_header_lines(values = tab5cap) %>%
-  align(align = "left", part="all") %>%
+    align(align = "right", part="body") %>%
+  align(align = "left", part="head") %>%
   border(part = "head", i = 2,
          border = list("width" = 0, color = "black", style = "solid"))
   
@@ -524,10 +385,159 @@ tab5dat%>%
 
 \newpage
 
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+#summarize norpac length data
+fig5dat<-norln%>%
+  group_by(year, mgmt_area, gear) %>%
+  summarize(n_length=sum(n_length))
+
+#summarize without gear calculating proportions
+lnsum<-fig5dat %>%
+  group_by(mgmt_area, year) %>%
+  summarize(Sum=round(sum(n_length),0))
+
+#create table
+tab2cap<-paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+
+fig5dat%>%
+  mutate(Year=year,
+         Area=mgmt_area) %>%
+  dplyr::select(Area, Year,  gear, n_length) %>%
+  pivot_wider(id_cols=c(Area, Year), names_from=gear, values_from=n_length) %>%
+   left_join(lnsum, by=c("Area"="mgmt_area", "Year"="year")) %>%
+  mutate(Year=as.factor(Year)) %>%
+   arrange(Area, Year) %>%
+  flextable() %>%
+    fontsize(size=11, part="all")%>%
+  font(part = "all", fontname = "Times New Roman") %>%
+    line_spacing(space = 0.3, part = "body")%>%
+    add_header_lines(values = tab2cap) %>%
+    align(align = "right", part="body") %>%
+  align(align = "left", part="head") %>%
+  border(part = "head", i = 1,
+         border = list("width" = 0, color = "black", style = "solid"))
+  # set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
+```
+
+
+
+\newpage
+
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+#summarize data
+fig6dat<-norage%>%
+  filter(type_1_otolith=="Y") %>% 
+  group_by(year, mgmt_area, gear) %>%
+  summarize(n_otolith=n())
+
+#summarize without gear for proportion
+osum<-fig6dat %>%
+  group_by(mgmt_area, year) %>%
+  summarize(Sum=round(sum(n_otolith),0))
+
+#create table
+tab3cap<-paste0("Table ", params$chapter, ".", params$appendix, ".4. Count of ",params$name, " otoliths collected at-sea in port by observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+
+fig6dat%>%
+  mutate(Year=year,
+         Area=mgmt_area) %>%
+  dplyr::select(Area, Year,  gear, n_otolith) %>%
+  pivot_wider(id_cols=c(Area, Year), names_from=gear, values_from=n_otolith) %>%
+  left_join(osum, by=c("Area"="mgmt_area", "Year"="year")) %>%
+    mutate(Year=as_factor(Year)) %>%
+     arrange(Area, Year) %>%
+  flextable() %>%
+    fontsize(size=11, part="all")%>%
+    line_spacing(space = 0.3, part = "body")%>%
+  font(part = "all", fontname = "Times New Roman") %>%
+  add_header_lines(values = tab3cap) %>%
+    align(align = "right", part="body") %>%
+  align(align = "left", part="head") %>%
+  border(part = "head", i = 1,
+         border = list("width" = 0, color = "black", style = "solid"))
+  # set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " otoliths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
+
+```
+
+\newpage
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+# .	This data is like the bottom panel of fig 4 (actual coverage of catch - %). Will now have a fig and table.
+# THIS TABLE IS NOT FULLY AUTOMATED. GEAR HEADERS NEED TO BE CHECKED (add_header_row flextable functions)
+
+areagear_tot <- casdat %>% 
+  filter(gear != "JIG") %>% 
+  group_by(year, mgmt_area, gear) %>% 
+  summarise(totcatch = sum(catch_mt))
+
+obs_prop <- casdat %>% 
+  filter(agency_gear_code != "JIG") %>% 
+  group_by(year, mgmt_area, observed, gear) %>% 
+  summarise(catch_mt = sum(catch_mt)) %>% 
+  inner_join(areagear_tot, by = c("year", "mgmt_area","gear")) %>% 
+  mutate(prop_catch = catch_mt/totcatch,
+         Coverage = recode(observed, "Catch Only"="EM", "Catch/Biologicals"="Observer", "None"="No Coverage"))
+
+obs_prop$Coverage<- factor(obs_prop$Coverage, levels=c("EM","Observer","No Coverage"))
+
+#create regional averages by gear and area
+tab4_area_gear<-obs_prop %>%
+  filter(gear!="JIG")%>%
+ group_by(mgmt_area, gear) %>%
+  summarize(catch_ag=sum(catch_mt))
+#create regional avg by gear area, and coverage
+tab4_area_gear_cov<-obs_prop %>%
+  filter(gear!="JIG")%>%
+  group_by(mgmt_area, gear, Coverage) %>%
+  summarize(catch_agc=sum(catch_mt))
+#create proportions of catch for all years
+tab4_sum<-tab4_area_gear_cov%>%
+  inner_join(tab4_area_gear, by=c("mgmt_area"="mgmt_area", "gear"="gear")) %>%
+  mutate(prop_catch=catch_agc/catch_ag)
+
+#combine with obs_prop
+tab4_dat<-tab4_sum%>%
+  mutate(year="Avg")%>%
+  dplyr::select(year, mgmt_area, gear, prop_catch, Coverage) %>%
+  bind_rows(obs_prop%>%
+              filter(year %in% (endyear-4):endyear) %>%
+              dplyr::select(year, mgmt_area, gear, prop_catch, Coverage))%>%
+  mutate(perc_catch=round((prop_catch*100),0))
+
+tab4cap<-paste0("Table ", params$chapter, ".", params$appendix, ".5. The proportion of ", params$name, " catch observed by observers (Obs) or electronic monitoring (EM) by area and gear for the most recent five years and the average proportions from 2013 through the current year. The remainder of the catch had no observer coverage. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+
+tab4_dat%>%
+  filter(Coverage!="No Coverage")%>%
+  mutate(Year=year, Area=mgmt_area)%>%
+    pivot_wider(id_cols=c(Area, Year), names_from=c(Coverage, gear), values_from=perc_catch)%>%
+  arrange(Area, Year) %>%
+  flextable() %>%
+  delete_part(part="header") %>%
+    fontsize(size=11, part="all")%>%
+    line_spacing(space = 0.3, part = "body")%>%
+  add_header_row(top = TRUE, values = c("Area", "Year", "% Obs", "% Obs", "% EM", "% Obs", "% EM", "% Obs" )#, colwidths = c(1,3,3)
+                 )%>%
+  add_header_row(top = TRUE, 
+    values = c("", "", "PTR", "NPT", "POT","POT", "HAL", "HAL" )#, colwidths = c(1,3,3)
+                 )%>%
+  add_header_lines(values = tab4cap) %>%
+    align(align = "right", part="body") %>%
+  align(align = "left", part="head") %>%
+  font(part = "all", fontname = "Times New Roman") %>%
+  border(part = "head", i = 2,
+         border = list("width" = 0, color = "black", style = "solid"))
+
+
+```
+
+\newpage
+
 # Figures
 
 
-```{r fig1, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".1. ", params$name_cap ," catch by gear type that was either the total of retained  and discarded, retained, or discarded by management area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig1, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1.2, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".1. ", params$name_cap ," catch by gear type that was either the total of retained  and discarded, retained, or discarded by management area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 
 
 theme_doc<- function(base_size = 12, base_family = "Arial") { #this function sets the theme for the whole figure
@@ -577,7 +587,7 @@ gear_colors <- c("#440154", "#31688E", "#35B779", "#FDE725","#6EDE76" )
   scale_color_manual(values=gear_colors)+
   scale_fill_manual(values=gear_colors)+
   #scale_y_continuous(expand = expansion(mult = c(0, 0.05)))+
-  scale_y_continuous(n.breaks=4)+
+  scale_y_continuous(n.breaks=5)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   theme_doc()
 
@@ -586,7 +596,7 @@ gear_colors <- c("#440154", "#31688E", "#35B779", "#FDE725","#6EDE76" )
 ```
 
 
-```{r fig3a, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".3a. ",params$name_cap," catch in each observer coverage category in the Observer Deploy and Declare System (ODDS), including fixed gear electronic monitoring (EM). This catch was not necessarily observed. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig2, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".2. ",params$name_cap," catch in each observer coverage category in the Observer Deploy and Declare System (ODDS), including fixed gear electronic monitoring (EM). This catch was not necessarily observed. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 #set plotting order
 casdat$obs_coverage<-factor(casdat$obs_coverage, levels = c("Partial", "EM Partial", "Full", "None"))
 
@@ -611,7 +621,7 @@ fig3a <- ggplot(fig3dat, aes(x=as.factor(year), y=catch_mt/1000, fill=obs_covera
   #scale_color_manual(values=coverage_colors)+
   #scale_fill_manual(values=coverage_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 4))+
-    scale_y_continuous(n.breaks=3)+
+    scale_y_continuous(n.breaks=5)+
   theme_doc()+
   theme(strip.text.y=element_text(size=10,colour='black', angle=360))
 
@@ -621,7 +631,7 @@ fig3a
 ```
 
 
-```{r fig3b, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".3b. ",params$name_cap," catch in each observer coverage category in the Observer Deploy and Declare System (ODDS), including fixed gear electronic monitoring (EM). This catch was not necessarily observed. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig3b, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".3.  Utilizing ",params$name," catch data, the proportions of ",params$name," catch in each observer coverage category in the Observer Deploy and Declare System (ODDS) for each area, gear, and year, including fixed gear electronic monitoring (EM). I.e.,  the catch for each area, gear, and year is scaled to 1. This catch was not necessarily observed. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 
 
 fig3b <- ggplot(fig3dat, aes(x=as.factor(year), y=prop_catch, fill=obs_coverage, color=obs_coverage))+
@@ -630,7 +640,7 @@ fig3b <- ggplot(fig3dat, aes(x=as.factor(year), y=prop_catch, fill=obs_coverage,
   labs(x = "Year", y = "Proportion")+
       scale_fill_viridis_d()+
     scale_color_viridis_d()+
-  scale_y_continuous(breaks=c(0,0.5, 1))+
+  scale_y_continuous(breaks=c(0,0.25,0.5,0.75, 1))+
   #scale_color_manual(values=coverage_colors)+
   #scale_fill_manual(values=coverage_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
@@ -643,7 +653,7 @@ fig3b
 ```
 
 
-```{r fig4a, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1.2, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".4a. ",params$name_cap," catch by gear type either observed by electronic monitoring (EM), observers, or no coverage. Biological samples were not taken whenever an observer was present. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig4, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1.2, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".4. ",params$name_cap," catch by gear type either observed by electronic monitoring (EM), observers, or no coverage. Biological samples were not taken whenever an observer was present. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 #biol_colors<-c("#625BC4","#AAD7DD","#D02C2F" )
 biol_colors<-c("#575195","#1ECAD3","#FF8300")
   
@@ -668,7 +678,7 @@ fig4a
 ```
 
 
-```{r fig4b, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1.2, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".4b. ",params$name_cap," catch by gear type either observed by electronic monitoring (EM), observers, or no coverage. Biological samples were not taken whenever an observer was present. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig5, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1.2, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".5. ",params$name_cap," catch by gear type either observed by electronic monitoring (EM), observers, or no coverage. Biological samples were not taken whenever an observer was present. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 #biol_colors<-c("#625BC4","#AAD7DD","#D02C2F" )
 
 
@@ -677,7 +687,7 @@ fig4b <- ggplot(obs_prop, aes(x=as.factor(year), y=prop_catch, fill=Coverage, co
     scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   facet_grid(mgmt_area~gear)+
   labs(x = "Year", y = "Proportion")+
-  scale_y_continuous(breaks=c(0,0.5,1))+
+  scale_y_continuous(breaks=c(0,0.25,0.5,0.75, 1))+
   scale_fill_viridis_d()+
   scale_color_viridis_d()+
   # scale_color_manual(values=biol_colors)+
@@ -690,12 +700,12 @@ fig4b <- ggplot(obs_prop, aes(x=as.factor(year), y=prop_catch, fill=Coverage, co
 fig4b
 ```
 
-```{r fig5, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".5. The total and proportion of ",params$name," lengths collected by observers by gear and area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig6, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".6. The number of total lengths collected by observers by gear and area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 #plot 
 
 #numbers
 fig5_lnum <-ggplot(fig5dat,aes(x=as.factor(year),y=n_length/1000,fill=gear))+
-  geom_bar(position="stack", stat="identity", show.legend = F)+
+  geom_bar(position="stack", stat="identity")+
   labs(y="Thousands of lengths collected", x = "Year", title="Lengths Collected")+
     scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
     scale_fill_viridis_d()+
@@ -710,7 +720,7 @@ fig5_lnum
 
 ```
 \newpage
-```{r fig5b, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".5. The total and proportion of ",params$name," lengths collected by observers by gear and area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig7, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".7. The proportion of lengths collected by observers by gear, area, and year. . I.e., the number of lengths collected for each area, gear, and year are scaled to 1. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 #plot 
 
 
@@ -724,7 +734,7 @@ fig5_lprop <- ggplot(fig5dat,aes(x=as.factor(year),y=n_length,fill=gear))+
   #   scale_color_manual(values=gear_colors)+
   # scale_fill_manual(values=gear_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
-  scale_y_continuous(breaks=c(0,1))+
+  scale_y_continuous(breaks=c(0,0.25,0.5,0.75, 1))+
   theme_doc()+
   theme(legend.position="bottom",
         strip.text.y=element_text(size=10,colour='black', angle=360))
@@ -734,7 +744,7 @@ fig5_lprop
 ```
 
 
-```{r fig6a, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".6a. The number of otoliths collected by observers and the proportion of ", params$name," otoliths collected by gear and area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig8, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".8. The number of otoliths  collected by gear and area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 
 #plot 
 
@@ -748,7 +758,7 @@ fig6_anum <-ggplot(fig6dat,aes(x=as.factor(year),y=n_otolith/1000,fill=gear))+
   # scale_color_manual(values=gear_colors)+
   # scale_fill_manual(values=gear_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
-  scale_y_continuous(n.breaks=3)+
+  scale_y_continuous(n.breaks=5)+
   theme_doc()+
     theme(strip.text.y=element_text(size=10,colour='black', angle=360))
 
@@ -758,7 +768,7 @@ fig6_anum
 ```
 
 
-```{r fig6b, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".6b. The number of otoliths collected by observers and the proportion of ", params$name," otoliths collected by gear and area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig9, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".9. The number of otoliths collected by observers and the proportion of ", params$name," otoliths collected by gear and area anbd year. . I.e., the number of otoliths collected for each area, gear, and year are scaled to 1. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 
 #plot 
 
@@ -772,7 +782,7 @@ fig6_aprop <- ggplot(fig6dat,aes(x=as.factor(year),y=n_otolith,fill=gear))+
   # scale_color_manual(values=gear_colors)+
   # scale_fill_manual(values=gear_colors)+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
-  scale_y_continuous(breaks=c(0,0.5,1))+
+  scale_y_continuous(breaks=c(0,0.25,0.5,0.75, 1))+
   theme_doc()+
   theme(legend.position = "bottom",
         strip.text.y=element_text(size=10,colour='black', angle=360))
@@ -781,7 +791,7 @@ fig6_aprop
 
 ```
 
-```{r fig7, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".7. The number of ",  params$name," lengths collected per ton of catch by management area (left) or by gear (right). Note differences in scales. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig10, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".10. The number of ",  params$name," lengths collected per ton of catch by management area (left) or by gear (right). Note differences in scales. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 
 #gear
 fig7dat_b <- norln%>%
@@ -825,7 +835,7 @@ suppressWarnings(grid.arrange(fig7a, fig7b, nrow=1))
 ```
 
 
-```{r fig8, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".8. The number of ",  params$name," otoliths collected per ton of catch by management area (left) or by gear (right). Note differences in scales. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig11, warning=FALSE, message=FALSE, echo=FALSE, fig.width=6, fig.asp=1, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".11. The number of ",  params$name," otoliths collected per ton of catch by management area (left) or by gear (right). Note differences in scales. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 
 
 #gear
@@ -872,7 +882,7 @@ grid.arrange(fig8a, fig8b, nrow=1) %>%
 ```
 
 
-```{r fig9a, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".9a. The proportion of ",  params$name," lengths that were measured at-sea versus in ports by observers. At-sea sampling provides haul level information, while shoreshide is lower resolution trip level information. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig12, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".12. The proportion of ",  params$name," lengths that were measured at-sea versus in ports by observers. At-sea sampling provides haul level information, while shoreshide is lower resolution trip level information. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 norln<-norln%>%mutate(obs_source=recode_factor(monitoring_status,"AT_SEA_WITH_SALMON_CENSUS"="At-Sea", "AT_SEA"="At-Sea","TRAWL_EM_WITH_SHORESIDE"="Shoreside", "NO_MONITORING"="Shoreside"))
 
 norln$obs_source2 <- addNA(norln$obs_source)
@@ -893,7 +903,7 @@ fig9a <- ggplot(fig9dat_a,aes(x=as.factor(year),y=n_length,fill=obs_source2))+
   #   scale_color_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
   # scale_fill_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
-  scale_y_continuous(n.breaks=3)+
+  scale_y_continuous(n.breaks=5)+
   theme_doc()
 
 fig9a
@@ -901,7 +911,7 @@ fig9a
 ```
 
 
-```{r fig9b, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".9b. The proportion of ",  params$name," lengths that were measured at-sea versus in ports by observers. At-sea sampling provides haul level information, while shoreshide is lower resolution trip level information. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
+```{r fig3, warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".13. The proportion of ",  params$name," lengths that were measured at-sea versus in ports by observers. At-sea sampling provides haul level information, while shoreshide is lower resolution trip level information. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")}
 
 
 fig9dat_b<-norln %>%
@@ -920,14 +930,14 @@ fig9b <- ggplot(fig9dat_b,aes(x=as.factor(year),y=n_length,fill=obs_source2))+
   #   scale_color_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
   # scale_fill_manual(values=c("#00467f","#BC4700","#4C9C2E"))+
   scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
-  scale_y_continuous(n.breaks=3)+
+  scale_y_continuous(n.breaks=5)+
   theme_doc()
 
 fig9b
 
 ```
 
-```{r fig10,  warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".10. The proportion of ",  params$name," catch with electronic monitoring (red) and the rate of length sampling (lengths per metric ton; black) for all gear types. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)")}
+```{r fig14,  warning=FALSE, message=FALSE, echo=FALSE, fig.asp=1.2, fig.width=6, fig.cap=paste0("Figure ", params$chapter, ".", params$appendix, ".14. The proportion of ",  params$name," catch with electronic monitoring (red) and the rate of length sampling (lengths per metric ton; black) for all gear types. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)")}
 
 #https://finchstudio.io/blog/ggplot-dual-y-axes/
 #for two y axes
@@ -989,19 +999,32 @@ ggplot() +
 
 # Additional Information 
 
-**Biological Collections**
-•	Lengths (mm), weight (tenth of a kg), and sagittal otoliths are collected by observers at-sea and at processing plants when North Pacific Groundfish Observer Program protocols call for collections. Otoliths are not collected from all fish that have lengths and weights recorded. Weights are collected when otoliths are collected.
-**Observer strata in the North Pacific Groundfish Observer Program**
-•	Full Coverage - Catcher/processors (with limited exceptions), motherships, catcher vessels that are participating in programs that have transferable prohibited species catch, catcher vessels using trawl gear that have requested full coverage for all fishing activity within the Bering Sea/Aleutian Islands FMP, and inshore processors receiving or processing Bering Sea pollock. Full coverage trips are all assumed to be 100% covered.
-•	Partial Coverage - Catcher vessels fishing in federally managed groundfish or parallel fisheries, excepting when in full coverage, catcher vessels participating in the Pacific halibut or sablefish IFQ fisheries, catcher vessels participating in the CDQ fisheries or those < 46ft LOA using hook-and-line gear for groundfish, catcher/processor that qualify for partial coverage, and shoreside or stationary floating processors that are not in the full coverage category are in the partial coverage category. 
-•	EM - trawl gear: Trips in this strata have EM recordings and all are reviewed. The review is for compliance monitoring only and catch is not enumerated. Vessels operating in the trawl EM program are required to retain all catch (with limited exceptions) for shoreside sampling by observers at the plant. Shoreside observer sampling targets a 100% coverage rate of all EM - trawl deliveries in the BSAI and 30% in the GOA . This strata went into effect in 2020 as an Exempted Fishing Permit program, only on non-pelagic trawl vessels targeting Pollock, and is becoming regulated for the 2024 fishery. 
-•	EM - fixed-gear: Includes both pot and hook-and-line vessels. Trips logged into ODDS have a partial coverage selection rate and, if selected, the vessel must record all hauls during that trip duration. After the videos are submitted, 30% of recorded hauls are reviewed and catch is fully censused along with discard status of each fish. There are no biological samples collected from fixed-gear EM trips. 
-•	EM note - EM fixed gear is a completely different program from EM non-pelagic trawl, with different origins, directives and methodologies.
-•	No Coverage or Zero Selection - Vessels < 40ft LOA, jig and exempted vessels.
-**Caveats**
-•	Data prior to the 2013 North Pacific Observer Program restructure are not included in the analyses presented here due to structural changes.
-•	Not all observer strata were covered each year. For example, hook and line (HAL) tender was only covered in 2017, in which a total of four trips were made and thus deemed not a useful strata to include. 
-•	2020 - Observer sampling was significantly impacted March-June due to the pandemic, resulting in minimal coverage during those months and reducing the annual realized coverage rates. 
+**Biological Collections**  
+
+•	Lengths (mm), weight (tenth of a kg), and sagittal otoliths are collected by observers at-sea and at processing plants when North Pacific Groundfish Observer Program protocols call for collections. Otoliths are not collected from all fish that have lengths and weights recorded. Weights are collected when otoliths are collected.  
+
+**Observer strata in the North Pacific Groundfish Observer Program**  
+
+•	Full Coverage - Catcher/processors (with limited exceptions), motherships, catcher vessels that are participating in programs that have transferable prohibited species catch, catcher vessels using trawl gear that have requested full coverage for all fishing activity within the Bering Sea/Aleutian Islands FMP, and inshore processors receiving or processing Bering Sea pollock. Full coverage trips are all assumed to be 100% covered.  
+
+•	Partial Coverage - Catcher vessels fishing in federally managed groundfish or parallel fisheries, excepting when in full coverage, catcher vessels participating in the Pacific halibut or sablefish IFQ fisheries, catcher vessels participating in the CDQ fisheries or those < 46ft LOA using hook-and-line gear for groundfish, catcher/processor that qualify for partial coverage, and shoreside or stationary floating processors that are not in the full coverage category are in the partial coverage category.   
+
+•	EM - trawl gear: Trips in this strata have EM recordings and all are reviewed. The review is for compliance monitoring only and catch is not enumerated. Vessels operating in the trawl EM program are required to retain all catch (with limited exceptions) for shoreside sampling by observers at the plant. Shoreside observer sampling targets a 100% coverage rate of all EM - trawl deliveries in the BSAI and 30% in the GOA . This strata went into effect in 2020 as an Exempted Fishing Permit program, only on non-pelagic trawl vessels targeting Pollock, and is becoming regulated for the 2024 fishery.   
+
+•	EM - fixed-gear: Includes both pot and hook-and-line vessels. Trips logged into ODDS have a partial coverage selection rate and, if selected, the vessel must record all hauls during that trip duration. After the videos are submitted, 30% of recorded hauls are reviewed and catch is fully censused along with discard status of each fish. There are no biological samples collected from fixed-gear EM trips.   
+
+•	EM note - EM fixed gear is a completely different program from EM non-pelagic trawl, with different origins, directives and methodologies.  
+
+•	No Coverage or Zero Selection - Vessels < 40ft LOA, jig and exempted vessels.  
+
+**Caveats**  
+
+•	Data prior to the 2013 North Pacific Observer Program restructure are not included in the analyses presented here due to structural changes.  
+
+•	Not all observer strata were covered each year. For example, hook and line (HAL) tender was only covered in 2017, in which a total of four trips were made and thus deemed not a useful strata to include.   
+
+•	2020 - Observer sampling was significantly impacted March-June due to the pandemic, resulting in minimal coverage during those months and reducing the annual realized coverage rates.   
+
 
 # References
 North Pacific Observe Program: https://www.fisheries.noaa.gov/alaska/fisheries-observers/north-pacific-observer-program
