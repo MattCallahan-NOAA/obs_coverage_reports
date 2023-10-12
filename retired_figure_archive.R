@@ -86,4 +86,20 @@ ggplot()+
   scale_x_continuous(labels=scaleFUN)
 
 
-```
+#Best attempt to do figure ten with ggplot
+scaleFUN <- function(x) sprintf("%.0f", x)
+
+scale=10
+
+
+suppressWarnings(
+  ggplot() +
+    geom_line(data=fig10propEM, aes(x=year, y=prop_em, color="Catch with EM/Total Catch (mt)"), size=1)+
+    geom_line(data=fig10lnmt, aes(x=year, y=lratio/scale, color="Lengths/mt"), size=1)+
+    facet_wrap(~mgmt_area, ncol=1, scales="free_y")+
+    scale_y_continuous(sec.axis = sec_axis(~.*scale, name="Lengths/mt")) +
+    labs(x = "", y = "Catch with EM/Total Catch (mt)", color = "") +
+    scale_color_manual(values = c("black", "red"))+
+    scale_x_continuous(labels=scaleFUN, n.breaks=nyears)+
+    theme_doc()
+)

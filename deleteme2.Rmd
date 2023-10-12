@@ -77,7 +77,7 @@ grid.arrange(p1,p2, nrow=1)
 
 \newpage
 
-```{r warning=FALSE, message=FALSE, echo=FALSE }
+```{r warning=FALSE, message=FALSE, echo=FALSE, include=FALSE, eval=FALSE }
 
 # Create a flextable
 table_caption=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
@@ -96,6 +96,29 @@ dummy%>%
   # set_caption(
   #   as_paragraph(
   #     as_chunk(paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."), props=fp_text_default(align="left"))))
+```
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE }
+
+
+  
+tab1cap=paste0("Table ", params$chapter, ".", params$appendix, ".2. Count of  ",params$name, " lengths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+
+# Create a flextable
+read.csv("fig1dat.csv") %>%flextable() %>%
+  add_header_lines(values = tab1cap) %>%
+  fontsize(size=11, part="body")%>%
+  font(part = "all", fontname = "Times New Roman") %>%
+  align(align = "right", part="body") %>%
+  align(align = "left", part="header", i=1) %>%
+  align(align = "right", part="header", i=2) %>%
+  line_spacing(space = 0.3, part = "body")%>%
+
+  border(part = "head", i = 1,
+         border = list("width" = 0, color = "black", style = "solid")) #%>%
+  #set_caption(tab1cap)
+
 ```
 
 
