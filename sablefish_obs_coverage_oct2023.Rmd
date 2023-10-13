@@ -61,7 +61,8 @@ con <- dbConnect(odbc::odbc(), "akfin", UID=getPass(msg="USER NAME"), PWD=getPas
 ```{r query-cas, include=FALSE}
 # define time
 startyear<-2013
-endyear<-year(ymd(Sys.Date()))-1
+#use the -1 at the end if you just want last year's data
+endyear<-year(ymd(Sys.Date()))#-1
 
 #pull catch data
 casdat<- dbFetch(dbSendQuery(con,
@@ -254,7 +255,7 @@ cas_retain_discard_sum<-cas_retain_discard %>%
                           ",",
                           substring(Sum, nchar(Sum) - 2, nchar(Sum)))))
 
-tab1cap<-paste0("Table ", params$chapter, ".", params$appendix, ".1. Total ", params$name, " catch (mt) by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+tab1cap<-paste0("Table ", params$chapter, ".", params$appendix, ".1. Total ", params$name, " catch (mt) by area, year, and gear. Gear types include non-pelagic  trawl (NPT), pot (POT), hook and line (HAL), pelagic trawl (PTR), or jig (JIG). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
 
 # found this function to make tables full width
 # https://stackoverflow.com/questions/57175351/flextable-autofit-in-a-rmarkdown-to-word-doc-causes-table-to-go-outside-page-mar
@@ -452,7 +453,7 @@ all_catch_ln_oto<-annual_catch_ln_oto %>%
          `Oto/mt`=round(`Oto/mt`,2))
 
 
-tab3cap<-paste0("Table ", params$chapter, ".", params$appendix, ".3. The total catch in mt for each area and year, the number of individual fish lengths (len) and otoliths (oto) collected, and the rate of length and otolith sampling, as sampling per mt of catch, for the five most recent years and the average from 2013-present. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+tab3cap<-paste0("Table ", params$chapter, ".", params$appendix, ".3. The total catch in mt for each area and year, the number of individual fish lengths (len) and otoliths (oto) collected, and the rate of length and otolith samples, as sampling per mt of catch, for the five most recent years and the average from 2013-present. Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
 
 ft3<-all_catch_ln_oto%>%
   arrange(Area)%>%
@@ -488,7 +489,7 @@ lnsum<-norln_gear_area_year %>%
   summarize(Sum=round(sum(n_length),0))
 
 #create table
-tab4cap<-paste0("Table ", params$chapter, ".", params$appendix, ".4. Count of  ",params$name, " lengths measured at-sea and in port by observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+tab4cap<-paste0("Table ", params$chapter, ".", params$appendix, ".4. Count of  ",params$name, " lengths measured at-sea and in port by observers by area, year, and gear. Gear types include non-pelagic trawl (NPT), hook and line (HAL), pot (POT), and pelagic trawl (PTR). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
 
 ft4<-norln_gear_area_year%>%
   mutate(Year=year,
@@ -538,7 +539,7 @@ osum<-oto_year_area_gear %>%
   summarize(Sum=round(sum(n_otolith),0))
 
 #create table
-tab5cap<-paste0("Table ", params$chapter, ".", params$appendix, ".5. Count of ",params$name, " otoliths collected at-sea in port by observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
+tab5cap<-paste0("Table ", params$chapter, ".", params$appendix, ".5. Count of ",params$name, " otoliths collected at-sea in port by observers by area, year, and gear. Gear types include non-pelagic trawl (NPT), hook and line (HAL), pot (POT), or pelagic trawl (PTR). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY).")
 
 ft5<-oto_year_area_gear%>%
   mutate(Year=year,
@@ -558,7 +559,7 @@ ft5<-oto_year_area_gear%>%
   align(align = "right", part="header", i=2) %>%
   border(part = "head", i = 1,
          border = list("width" = 0, color = "black", style = "solid"))
-  # set_caption(caption=paste0("Table ", params$chapter, ".", params$appendix, ".3. Count of  ",params$name, " otoliths measured by at-sea and port observers by area, year, and gear. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), pot (POT), or hook and line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."))
+ 
 
 FitFlextableToPage(ft5)
 
