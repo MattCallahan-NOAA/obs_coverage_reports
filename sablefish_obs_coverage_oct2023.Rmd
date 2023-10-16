@@ -61,8 +61,8 @@ con <- dbConnect(odbc::odbc(), "akfin", UID=getPass(msg="USER NAME"), PWD=getPas
 ```{r query-cas, include=FALSE}
 # define time
 startyear<-2013
-#use the -1 at the end if you just want last year's data
-endyear<-year(ymd(Sys.Date()))#-1
+#use the -1 at the end if you just want data through last year
+endyear<-year(ymd(Sys.Date()))-1
 
 #pull catch data
 casdat<- dbFetch(dbSendQuery(con,
