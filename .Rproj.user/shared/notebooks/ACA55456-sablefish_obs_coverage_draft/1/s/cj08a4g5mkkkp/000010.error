@@ -1,0 +1,1 @@
+{"frames":[{"func":"ggplot(fig5dat, aes(x = as.factor(year), y = n_length/1000, fill = gear))","file":"","line_number":0,"end_line_number":0,"character_number":0,"end_character_number":0}],"message":"Error: object 'fig5dat' not found\n"}

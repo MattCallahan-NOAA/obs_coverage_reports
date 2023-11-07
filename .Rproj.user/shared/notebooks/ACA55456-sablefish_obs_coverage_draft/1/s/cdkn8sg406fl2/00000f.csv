@@ -1,0 +1,10 @@
+"2","r error 4 (Error in eval(ele) : object 'params' not found
+)"
+"0","obs_prop <- casdat %>% "
+"0","  filter(agency_gear_code != ""JIG"") %>% "
+"0","  group_by(year, mgmt_area, observed, gear) %>% "
+"0","  summarise(catch_mt = sum(catch_mt)) %>% "
+"0","  inner_join(areagear_tot, by = c(""year"", ""mgmt_area"",""gear"")) %>% "
+"0","  mutate(prop_catch = catch_mt/totcatch,"
+"0","         Coverage = recode(observed, ""Catch Only""=""EM"", ""Catch/Biologicals""=""Observer"", ""None""=""No Coverage""))"
+"2","`summarise()` has grouped output by 'year', 'mgmt_area', 'observed'. You can override using the `.groups` argument."

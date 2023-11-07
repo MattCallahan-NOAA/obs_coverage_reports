@@ -1,0 +1,3 @@
+"0",""
+"0","#connect to AKFIN"
+"0","con <- dbConnect(odbc::odbc(), ""akfin"", UID=getPass(msg=""USER NAME""), PWD=getPass())"

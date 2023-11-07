@@ -1,0 +1,17 @@
+"2","r error 4 (Error in eval(ele) : object 'params' not found
+)"
+"0","#numbers"
+"0","fig5_lnum <-ggplot(fig5dat,aes(x=as.factor(year),y=n_length/1000,fill=gear))+"
+"0","  geom_bar(position=""stack"", stat=""identity"", show.legend = F)+"
+"0","  labs(y=""Thousands of lengths collected"", x = ""Year"", title=""Lengths Collected"")+"
+"0","    scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+"
+"0","    scale_fill_viridis_d()+"
+"0","  scale_color_viridis_d()+"
+"0","  #   scale_color_manual(values=gear_colors)+"
+"0","  # scale_fill_manual(values=gear_colors)+"
+"0","  facet_grid(mgmt_area~.)+"
+"0","  theme_doc()+"
+"0","  theme(legend.position=""none"","
+"0","        strip.text.y=element_text(size=10,colour='black', angle=360))"
+"2","Error: object 'fig5dat' not found
+"

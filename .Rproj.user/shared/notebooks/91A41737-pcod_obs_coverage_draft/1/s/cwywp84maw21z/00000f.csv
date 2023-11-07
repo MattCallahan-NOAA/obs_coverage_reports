@@ -1,0 +1,4 @@
+"2","r error 4 (Error in paste0(""Figure 1. "", params$name, "" catch by gear type that was either retained, discarded, or the sum of retained and discarded by management area. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."") : 
+  object 'params' not found
+)"
+"0","gear_colors<-c(""#93D500"", ""#007934"",""#FF8300"", ""#0093D0"",""#7F7FFF"")"
