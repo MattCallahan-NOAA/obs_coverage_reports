@@ -1,4 +1,0 @@
-"2","r error 4 (Error in paste0(""Figure 4. "", params$name_cap, "" catch by gear type either observed by electronic monitoring (EM), observers, or no coverage. Biological samples were not taken whenever an observer was present. Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."") : 
-  object 'params' not found
-)"
-"0","suppressWarnings(grid.arrange(fig4a, fig4b, nrow=2))"

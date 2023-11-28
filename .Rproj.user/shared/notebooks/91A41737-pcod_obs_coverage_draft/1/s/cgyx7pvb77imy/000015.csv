@@ -1,4 +1,0 @@
-"2","r error 4 (Error in paste0(""Figure 6. The total and proportion of "", params$name,  : 
-  object 'params' not found
-)"
-"0","suppressWarnings(grid.arrange(fig6_anum, fig6_aprop, nrow=2))"

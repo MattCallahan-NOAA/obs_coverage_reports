@@ -1,4 +1,0 @@
-"2","r error 4 (Error in paste0(""Figure 7. The number of "", params$name, "" lengths collected per ton of catch by management area (panel a) or by gear (panel b). Gear types include pelagic trawl (PTR), non-pelagic trawl (NPT), Pot (POT), or Hook and Line (HAL). Areas include the Aleutian Islands (AI), Bering Sea (BS), Western Gulf of Alaska (WGOA), Central Gulf of Alaska (CGOA), West Yakutat (WY), and East Yakutat (EY)."") : 
-  object 'params' not found
-)"
-"0","suppressWarnings(grid.arrange(fig7a, fig7b, nrow=1))"
