@@ -39,7 +39,7 @@ Lengths and otoliths are collected at-sea and in ports and the rate of collectio
 ```{r load-packages, include=FALSE}
 library(tidyverse)
 library(odbc)
-library(getPass)
+library(keyring)
 library(lubridate)
 library(janitor)
 library(gridExtra)
@@ -55,7 +55,7 @@ options(scipen = 999)
 ```{r connect-to-akfin, include=FALSE}
 
 #connect to AKFIN
-con <- dbConnect(odbc::odbc(), "akfin", UID=getPass(msg="USER NAME"), PWD=getPass())
+con <- dbConnect(odbc::odbc(), "akfin", UID=key_list("akfin_oracle_db")$username, PWD = keyring::key_get("akfin_oracle_db", keyring::key_list("akfin_oracle_db")$username))
 ```
 
 ```{r query-cas, include=FALSE}
