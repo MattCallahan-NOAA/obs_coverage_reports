@@ -1,8 +1,0 @@
-"2","r error 4 (Error in eval(ele) : object 'params' not found
-)"
-"0","#plot ln/mt"
-"0","p1<-xyplot(lratio ~ year | mgmt_area, data = norln_year_area_lratio, type = 'l',  lwd = 2,"
-"0","       xlab = 'Year', ylab = 'Lengths/mt',"
-"0","       scales=list(y=list(relation=""free""), "
-"0","                   tck=c(1,0)),"
-"0","       layout = c(1, 6))"

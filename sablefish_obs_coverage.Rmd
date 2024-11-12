@@ -653,7 +653,7 @@ cas_obs_cov_year_area_gear<-casdat %>%
 fig2 <- ggplot(cas_obs_cov_year_area_gear, aes(x=as.factor(year), y=catch_mt/1000, fill=obs_coverage, color=obs_coverage))+
   geom_bar(position = position_stack(), stat = "identity", width=1)+
   facet_grid(mgmt_area~gear)+
-  labs(x = "Year", y = "Catch (thousand mt)")+
+  labs(x = "Year", y = "Catch (thousand t)")+
       scale_fill_viridis_d()+
     scale_color_viridis_d()+
   #scale_color_manual(values=coverage_colors)+
@@ -703,7 +703,7 @@ fig4 <- ggplot(obs_prop, aes(x=as.factor(year), y=catch_mt/1000, fill=Coverage, 
   geom_bar(position = position_stack(), stat = "identity", width=1)+
     scale_x_discrete(breaks = seq(startyear, endyear, by = 3))+
   facet_grid(mgmt_area~gear)+
-  labs(x = "Year", y = "Catch (thousand mt)")+
+  labs(x = "Year", y = "Catch (thousand t)")+
   scale_y_continuous(n.breaks=3)+
         scale_fill_viridis_d()+
     scale_color_viridis_d()+
@@ -853,7 +853,7 @@ norln_year_area_ln_mt <- norln%>%
 #area
 fig10a <-ggplot(norln_year_area_lratio, aes(x=as.factor(year), y=lratio, fill= mgmt_area))+
   geom_bar(position="stack", stat="identity", show.legend=FALSE)+
-  labs(y="Number of lengths/mt", x = "Year", title="Lengths/mt by Area")+
+  labs(y="Number of lengths/t", x = "Year", title="Lengths/t by Area")+
   facet_grid(~mgmt_area~., scales="free")+
     scale_fill_viridis_d()+
   scale_color_viridis_d()+
@@ -865,7 +865,7 @@ fig10a <-ggplot(norln_year_area_lratio, aes(x=as.factor(year), y=lratio, fill= m
 #gear
 fig10b <-ggplot(norln_year_area_ln_mt, aes(x=as.factor(year), y=lratio, fill= gear))+
   geom_bar(position="stack", stat="identity", show.legend=FALSE)+
-  labs(y="Number of lengths/mt", x = "Year", title="Lengths/mt by Gear")+
+  labs(y="Number of lengths/t", x = "Year", title="Lengths/t by Gear")+
   facet_grid(~gear~., scales="free")+
     scale_fill_viridis_d()+
   scale_color_viridis_d()+
@@ -899,7 +899,7 @@ norage_year_area_ln_mt <- norage%>%
 #area
 fig11a <-ggplot(norage_year_area_oratio, aes(x=as.factor(year), y=oratio, fill= mgmt_area))+
   geom_bar(position="stack", stat="identity", show.legend=FALSE)+
-  labs(y="Number otoliths/mt", x = "Year", title="Otoliths/mt by area")+
+  labs(y="Number otoliths/t", x = "Year", title="Otoliths/t by area")+
   facet_grid(~mgmt_area~., scales="free")+
     scale_fill_viridis_d()+
   scale_color_viridis_d()+
@@ -911,7 +911,7 @@ fig11a <-ggplot(norage_year_area_oratio, aes(x=as.factor(year), y=oratio, fill= 
 #gear
 fig11b <-ggplot(norage_year_area_ln_mt, aes(x=as.factor(year), y=oratio, fill= gear))+
   geom_bar(position="stack", stat="identity", show.legend=FALSE)+
-  labs(y="Number otoliths/mt", x = "Year", title="Otoliths/mt by gear")+
+  labs(y="Number otoliths/t", x = "Year", title="Otoliths/t by gear")+
     scale_fill_viridis_d()+
   scale_color_viridis_d()+
   # scale_color_manual(values=gear_colors)+
@@ -1022,14 +1022,14 @@ fix_gear_lratio_year_area$mgmt_area <- factor(fix_gear_lratio_year_area$mgmt_are
 
 #plot ln/mt
 p1<-xyplot(lratio ~ year | mgmt_area, data = fix_gear_lratio_year_area, type = 'l',  lwd = 2,
-       xlab = 'Year', ylab = 'Lengths/mt',
+       xlab = 'Year', ylab = 'Lengths/t',
        scales=list(y=list(relation="free"), 
                    tck=c(1,0)),
        layout = c(1, 6))
 
 #plot prop em
 p2<-xyplot(prop_em ~ year | mgmt_area, data = cas_prop_em, type = 'l', lwd = 2,
-           ylab = 'Catch with EM/Total Catch (mt)',
+           ylab = 'Catch with EM/Total Catch (t)',
            #ylim = c(0,0.4),
            scales=list(y=list(relation="free"), 
                    tck=c(1,0)),
